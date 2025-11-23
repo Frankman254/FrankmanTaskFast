@@ -12,6 +12,10 @@ const APP_CONFIG = {
 };
 
 app.listen(SERVER_CONFIG.port, SERVER_CONFIG.host, () => {
-	console.log(`🚀 ${APP_CONFIG.name} API running on http://${SERVER_CONFIG.host}:${SERVER_CONFIG.port}`);
-	console.log(`📊 Health check: http://${SERVER_CONFIG.host}:${SERVER_CONFIG.port}/health`);
+	console.log(
+		`🚀 ${APP_CONFIG.name} API running on http://${SERVER_CONFIG.host}:${SERVER_CONFIG.port}`
+	);
+	console.log(
+		`📊 Health check: http://${SERVER_CONFIG.host}:${SERVER_CONFIG.port}/health`
+	);
 });

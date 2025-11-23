@@ -8,12 +8,17 @@ const DATABASE_CONFIG = {
 	user: process.env.DB_USER || 'postgres',
 	password: process.env.DB_PASSWORD || 'password',
 	database: process.env.DB_NAME || 'frankman_task_fast',
-	url: process.env.DATABASE_URL || `postgresql://${process.env.DB_USER || 'postgres'}:${process.env.DB_PASSWORD || 'password'}@${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '5432'}/${process.env.DB_NAME || 'frankman_task_fast'}`,
+	url:
+		process.env.DATABASE_URL ||
+		`postgresql://${process.env.DB_USER || 'postgres'}:${process.env.DB_PASSWORD || 'password'}@${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '5432'}/${process.env.DB_NAME || 'frankman_task_fast'}`,
 };
 
 export const pool = new Pool({
 	connectionString: DATABASE_CONFIG.url,
-	ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+	ssl:
+		process.env.NODE_ENV === 'production'
+			? { rejectUnauthorized: false }
+			: false,
 });
 
 // Test the connection

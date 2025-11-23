@@ -1,5 +1,7 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import prettier from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
 
 export default tseslint.config(
 	{
@@ -7,7 +9,11 @@ export default tseslint.config(
 	},
 	js.configs.recommended,
 	...tseslint.configs.recommended,
+	prettier,
 	{
+		plugins: {
+			prettier: prettierPlugin,
+		},
 		languageOptions: {
 			globals: {
 				process: 'readonly',
@@ -21,9 +27,15 @@ export default tseslint.config(
 			},
 		},
 		rules: {
-			'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+			'prettier/prettier': 'error',
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{ argsIgnorePattern: '^_' },
+			],
 			'@typescript-eslint/no-explicit-any': 'warn',
-			'indent': ['error', 'tab'],
+			// Disable conflicting rules that Prettier handles
+			indent: 'off',
+			'@typescript-eslint/indent': 'off',
 		},
 	}
 );
