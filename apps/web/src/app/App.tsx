@@ -2,9 +2,7 @@ import { type FC } from 'react';
 
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-import PrincipalTable from '@/components/PrincipalTable';
-import RightBar from '@/components/RightBar';
-
+import BodyFull from '@/components/BodyFull';
 const App: FC = () => {
 	return (
 		<>
@@ -12,10 +10,7 @@ const App: FC = () => {
 				<Header className="" />
 				<div className="flex flex-col justify-center bg-gray-100 max-w-[2000px]">
 					<main className="">
-						<div className="flex flex-row h-[calc(80vh-100px)]">
-							<RightBar className=" color-red-500" />
-							<PrincipalTable className="" />
-						</div>
+						<BodyFull className="" />
 					</main>
 				</div>
 				<Footer className="w-full mb-0" />
