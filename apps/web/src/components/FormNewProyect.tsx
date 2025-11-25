@@ -11,14 +11,27 @@ export default function FormNewProyect({ className = '', onAdd }: FormNewProyect
         name: '',
         description: '',
         owner_id: 0,
-        color: '',
+        color: '#3b82f6', // Color azul por defecto
         is_archived: false,
     });
-    const handleAddProyecto = () => {
+    const handleAddProyecto = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!proyecto.name.trim()) {
+            return; // No agregar si no hay nombre
+        }
         onAdd({
             ...proyecto,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
+        });
+        // Resetear el formulario
+        setProyecto({
+            id: Date.now(),
+            name: '',
+            description: '',
+            owner_id: 0,
+            color: '#3b82f6',
+            is_archived: false,
         });
     };
     return (

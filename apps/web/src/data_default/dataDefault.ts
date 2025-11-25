@@ -1,0 +1,155 @@
+export const proyectosDefault = [
+    {
+        id: 1,
+        name: 'Proyecto 1',
+        description: 'Descripción del proyecto 1',
+        owner_id: 1,
+        color: '#3b82f6',
+        is_archived: false,
+    },
+    {
+        id: 2,
+        name: 'Proyecto 2',
+        description: 'Descripción del proyecto 2',
+        owner_id: 1,
+        color: '#3b82f6',
+        is_archived: false,
+    },
+    {
+        id: 3,
+        name: 'Proyecto 3',
+        description: 'Descripción del proyecto 3',
+        owner_id: 1,
+        color: '#3b82f6',
+        is_archived: false,
+    },
+];
+
+export const grillasDefault = [
+    {
+        id: 1,
+        name: 'Grilla 1',
+        position: 1,
+        color: '#25dc1cff',
+    },
+    {
+        id: 2,
+        name: 'Grilla 2',
+        position: 2,
+        color: '#cd0606ff',
+    },
+    {
+        id: 3,
+        name: 'Grilla 3',
+        position: 3,
+        color: '#e4f009ff',
+    },
+    {
+        id: 4,
+        name: 'Grilla 4',
+        position: 4,
+        color: '#000000',
+    },
+    {
+        id: 5,
+        name: 'Grilla 5',
+        position: 5,
+        color: '#000000',
+    },
+    {
+        id: 6,
+        name: 'Grilla 6',
+        position: 6,
+        color: '#000000',
+    },
+    {
+        id: 7,
+        name: 'Grilla 7',
+        position: 7,
+        color: '#000000',
+    },
+    {
+        id: 8,
+        name: 'Grilla 8',
+        position: 8,
+        color: '#000000',
+    },
+    {
+        id: 9,
+        name: 'Grilla 9',
+        position: 9,
+        color: '#000000',
+    },
+    {
+        id: 10,
+        name: 'Grilla 10',
+        position: 10,
+        color: '#000000',
+    },
+];
+
+export const usersDefault = [
+    {
+        id: 1,
+        name: 'Usuario 1',
+        email: 'usuario1@example.com',
+        password: '123456',
+    },
+    {
+        id: 2,
+        name: 'Usuario 2',
+        email: 'usuario2@example.com',
+        password: '123456',
+    },
+    {
+        id: 3,
+        name: 'Usuario 3',
+        email: 'usuario3@example.com',
+        password: '123456',
+    },
+];
+
+export const tareasDefault = [
+    {
+        id: 1,
+        grilla_id: 1,
+        title: 'Tarea 1',
+        description: 'Descripción de la tarea 1',
+        position: 1,
+        assigned_to: 1,
+        start_date: new Date().toISOString(),
+        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        priority: 'Alta',
+        created_by: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    },
+    {
+        id: 2,
+        grilla_id: 1,
+        title: 'Tarea 2',
+        description: 'Descripción de la tarea 2',
+        position: 2,
+        assigned_to: 2,
+        start_date: new Date().toISOString(),
+        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        priority: 'Media',
+        created_by: 2,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    },
+    {
+        id: 3,
+        grilla_id: 1,
+        title: 'Tarea 3',
+        description: 'Descripción de la tarea 3',
+        position: 3,
+        assigned_to: 3,
+        start_date: new Date().toISOString(),
+        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        priority: 'Baja',
+        created_by: 3,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    },
+];

@@ -20,11 +20,11 @@ export default function FormNewGrilla({ className = '', onAdd }: FormNewGrillaPr
         e.preventDefault(); // ← CRÍTICO: evita reload de página
 
         // Llamar a la función del padre que actualiza el array
+        // El proyect_id se asignará automáticamente en el componente padre
         onAdd({
-            id: Date.now(), // Generate unique temporary ID
+            id: Date.now(), // ID temporal, se reemplazará
             name: grilla.name,
             color: grilla.color,
-            proyect_id: grilla.proyect_id,
         });
     };
     return (
@@ -54,14 +54,6 @@ export default function FormNewGrilla({ className = '', onAdd }: FormNewGrillaPr
                 type="color"
                 placeholder="Color de la grilla"
                 value={grilla.color}
-                onChange={handleChange}
-            />
-            <label className="text-sm font-semibold" htmlFor="proyect_id">Proyecto</label>
-            <input
-                name="proyect_id"
-                type="number"
-                placeholder="Proyecto de la grilla"
-                value={grilla.proyect_id}
                 onChange={handleChange}
             />
             <button className="bg-blue-500 text-white px-4 py-2 rounded-md" type="submit">Agregar Grilla</button>
