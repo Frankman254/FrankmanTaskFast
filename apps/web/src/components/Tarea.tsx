@@ -18,7 +18,7 @@ export default function Tarea({ tarea }: { tarea: Tarea }) {
             style={style}
             {...attributes}
             {...listeners}
-            className="bg-white border-2 border-gray-300 rounded-lg p-3 mb-2 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-shadow"
+            className="bg-white border-2 border-gray-400 hover:border-indigo-500 rounded-xl transition-all p-3 mb-2 cursor-grab active:cursor-grabbing shadow-lg hover:shadow-xl transition-shadow"
         >
             <h3 className="text-sm font-semibold text-gray-800 mb-1">{tarea.title}</h3>
             {tarea.description && (
