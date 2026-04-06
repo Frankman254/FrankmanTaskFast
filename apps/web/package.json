@@ -20,6 +20,7 @@
 		"@dnd-kit/utilities": "^3.2.2",
 		"@frankman-task-fast/config": "*",
 		"@frankman-task-fast/types": "*",
+		"lucide-react": "^1.7.0",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1"
 	},

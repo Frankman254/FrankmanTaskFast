@@ -8,27 +8,31 @@ import ProyectoTablero from "./ProyectoTablero";
 import { grillasDefault, proyectosDefault, tareasDefault } from "../data_default/dataDefault";
 import FormNewGrilla from "./FormNewGrilla";
 import Modal from "./Modal";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import ProjectDashboard from "./ProjectDashboard";
+import { ClipboardList } from "lucide-react";
 
 export default function BodyFull() {
     const [isModalOpenProyecto, setIsModalOpenProyecto] = useState(false);
     const [isModalOpenTarea, setIsModalOpenTarea] = useState(false);
     const [isModalOpenGrilla, setIsModalOpenGrilla] = useState(false);
     const [grillaSeleccionadaParaTarea, setGrillaSeleccionadaParaTarea] = useState<number | null>(null);
-    const [proyectos, setProyectos] = useState<Proyecto[]>(proyectosDefault);
     
-    const [proyectoActivo, setProyectoActivo] = useState<number | null>(
+    // Connect to LocalStorage for persistence
+    const [proyectos, setProyectos] = useLocalStorage<Proyecto[]>('frankman_proyectos', proyectosDefault);
+    
+    const [proyectoActivo, setProyectoActivo] = useLocalStorage<number | null>('frankman_proyecto_activo',
         proyectosDefault.length > 0 ? proyectosDefault[0].id : null
     );
     
-    // Grillas already have proyect_id in defaults
-    const [todasLasGrillas, setTodasLasGrillas] = useState<Grilla[]>(
+    const [todasLasGrillas, setTodasLasGrillas] = useLocalStorage<Grilla[]>('frankman_grillas',
         grillasDefault.map(g => ({
             ...g,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: (g as any).created_at || new Date().toISOString(),
+            updated_at: (g as any).updated_at || new Date().toISOString(),
         }))
     );
-    const [todasLasTareas, setTodasLasTareas] = useState<Tarea[]>(tareasDefault);
+    const [todasLasTareas, setTodasLasTareas] = useLocalStorage<Tarea[]>('frankman_tareas', tareasDefault);
 
     const handleAddProyecto = (nuevoProyecto: Proyecto) => {
         setProyectos(prevProyectos => {
@@ -161,27 +165,34 @@ export default function BodyFull() {
             </div>
 
             {/* Main content area - full width, no sidebar */}
-            <div className="flex-1 overflow-hidden px-4 py-3">
+            <div className="flex-1 overflow-hidden px-4 py-3 flex flex-col">
                 {proyectoActivo && proyectoSeleccionado ? (
-                    <ProyectoTablero
-                        proyecto={proyectoSeleccionado}
-                        grillas={grillasDelProyectoActivo}
-                        onUpdateGrillas={(nuevasGrillas) => 
-                            handleUpdateGrillas(proyectoActivo, nuevasGrillas)
-                        }
-                        getNextGrillaId={getNextGrillaId}
-                        className="h-full"
-                        tareas={tareasDelProyectoActivo}
-                        onUpdateTareas={handleUpdateTareas}
-                        getNextTareaId={getNextTareaId}
-                        onOpenModalTarea={handleOpenModalTarea}
-                        onOpenModalGrilla={handleOpenModalGrilla}
-                    />
+                    <>
+                        <ProjectDashboard 
+                            proyecto={proyectoSeleccionado} 
+                            grillas={grillasDelProyectoActivo} 
+                            tareas={tareasDelProyectoActivo} 
+                        />
+                        <ProyectoTablero
+                            proyecto={proyectoSeleccionado}
+                            grillas={grillasDelProyectoActivo}
+                            onUpdateGrillas={(nuevasGrillas) => 
+                                handleUpdateGrillas(proyectoActivo, nuevasGrillas)
+                            }
+                            getNextGrillaId={getNextGrillaId}
+                            className="flex-1 overflow-hidden"
+                            tareas={tareasDelProyectoActivo}
+                            onUpdateTareas={handleUpdateTareas}
+                            getNextTareaId={getNextTareaId}
+                            onOpenModalTarea={handleOpenModalTarea}
+                            onOpenModalGrilla={handleOpenModalGrilla}
+                        />
+                    </>
                 ) : (
-                    <div className="flex items-center justify-center h-full">
+                    <div className="flex items-center justify-center h-full flex-1">
                         <div className="text-center animate-fadeIn">
                             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                                <span className="text-3xl">📋</span>
+                                <ClipboardList className="w-8 h-8 text-white" />
                             </div>
                             <p className="text-gray-500 dark:text-gray-400 text-lg mb-4 font-medium">
                                 {proyectos.length === 0 

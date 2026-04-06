@@ -32,4 +32,5 @@ export interface Tarea {
     created_by: number;
     created_at: string;
     updated_at: string;
+    history?: { action: string; timestamp: string; from_grilla?: number; to_grilla?: number }[];
 }   

@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+
 interface ButtonAddProps {
     handleOpenModal: () => void;
     buttonText: string;
@@ -8,10 +10,11 @@ interface ButtonAddProps {
 export default function ButtonAdd({ handleOpenModal, buttonText, colorButton = 'bg-emerald-500 hover:bg-emerald-600', className = '' }: ButtonAddProps) {
     return (
         <button
-            className={`${colorButton} h-9 text-white px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md active:scale-95 ${className}`}
+            className={`${colorButton} h-9 text-white px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md active:scale-95 flex items-center gap-1.5 ${className}`}
             onClick={handleOpenModal}
         >
-            <span className="text-white text-xs font-semibold">{buttonText}</span>
+            <Plus className="w-4 h-4 opacity-80" />
+            <span className="text-white text-xs font-semibold">{buttonText.replace('+', '').trim()}</span>
         </button>
     );
 }

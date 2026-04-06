@@ -1,4 +1,5 @@
 import { useTheme } from '@/hooks/use-theme';
+import { Sun, Moon, Monitor, LayoutTemplate } from 'lucide-react';
 
 export default function Header() {
 	const { theme, setTheme } = useTheme();
@@ -9,7 +10,7 @@ export default function Header() {
 		else setTheme('light');
 	};
 
-	const themeIcon = theme === 'dark' ? '🌙' : theme === 'light' ? '☀️' : '💻';
+	const ThemeIcon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor;
 	const themeLabel = theme === 'dark' ? 'Oscuro' : theme === 'light' ? 'Claro' : 'Sistema';
 
 	return (
@@ -17,7 +18,7 @@ export default function Header() {
 			<div className="max-w-[1800px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
 				<div className="flex items-center gap-3">
 					<div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-md">
-						<span className="text-white text-sm font-bold">F</span>
+						<LayoutTemplate className="w-4 h-4 text-white" />
 					</div>
 					<div>
 						<h1 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
@@ -34,7 +35,7 @@ export default function Header() {
 					className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer"
 					title={`Tema: ${themeLabel}`}
 				>
-					<span className="text-base">{themeIcon}</span>
+					<ThemeIcon className="w-4 h-4" />
 					<span className="hidden sm:inline text-xs">{themeLabel}</span>
 				</button>
 			</div>

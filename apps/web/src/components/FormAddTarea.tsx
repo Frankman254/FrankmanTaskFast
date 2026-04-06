@@ -14,7 +14,7 @@ export default function FormAddTarea({ onAdd, onClose }: FormAddTareaProps) {
         description: '',
         position: 0,
         assigned_to: 0,
-        start_date: '',
+        start_date: new Date().toISOString(),
         due_date: '',
         priority: 'Media',
         created_by: 0,
