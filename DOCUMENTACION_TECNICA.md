@@ -522,3 +522,5 @@ onClick={(e) => {
 
 **Esta documentación técnica complementa la documentación principal. Úsala cuando necesites entender los detalles de implementación.**
 
+
+

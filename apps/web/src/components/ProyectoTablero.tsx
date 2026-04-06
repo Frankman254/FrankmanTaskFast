@@ -21,9 +21,9 @@ interface ProyectoTableroProps {
     onOpenModalGrilla: () => void;
 }
 
-export default function ProyectoTablero({ 
-    proyecto, 
-    grillas, 
+export default function ProyectoTablero({
+    proyecto,
+    grillas,
     onUpdateGrillas,
     getNextGrillaId,
     className = '',
@@ -34,7 +34,7 @@ export default function ProyectoTablero({
     onOpenModalGrilla,
 }: ProyectoTableroProps) {
     const [activeId, setActiveId] = useState<string | null>(null);
-    
+
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -83,7 +83,7 @@ export default function ProyectoTablero({
         if (activeId.startsWith('tarea-')) {
             const tareaId = parseInt(activeId.replace('tarea-', ''));
             const tarea = tareas.find(t => t.id === tareaId);
-            
+
             if (!tarea) return;
 
             // Si se está moviendo a una grilla (droppable) - tiene prioridad
@@ -91,14 +91,14 @@ export default function ProyectoTablero({
                 const nuevaGrillaId = parseInt(
                     overId.replace('droppable-grilla-', '').replace('droppable-tareas-grilla-', '')
                 );
-                
+
                 if (tarea.grilla_id === nuevaGrillaId) return;
 
                 // Obtener todas las tareas de la grilla destino ordenadas por posición
                 const tareasEnNuevaGrilla = tareas
                     .filter(t => t.grilla_id === nuevaGrillaId && t.id !== tareaId)
                     .sort((a, b) => (a.position || 0) - (b.position || 0));
-                
+
                 // La nueva posición será al final
                 const nuevaPosicion = tareasEnNuevaGrilla.length + 1;
 
@@ -138,7 +138,7 @@ export default function ProyectoTablero({
             if (overId.startsWith('tarea-')) {
                 const overTareaId = parseInt(overId.replace('tarea-', ''));
                 const overTarea = tareas.find(t => t.id === overTareaId);
-                
+
                 if (!overTarea) return;
 
                 // Si están en la misma grilla, reordenar (la tarea movida toma el lugar de la otra)
@@ -147,13 +147,13 @@ export default function ProyectoTablero({
                     const tareasEnGrilla = tareas
                         .filter(t => t.grilla_id === tarea.grilla_id)
                         .sort((a, b) => (a.position || 0) - (b.position || 0));
-                    
+
                     const oldIndex = tareasEnGrilla.findIndex(t => t.id === tareaId);
                     const newIndex = tareasEnGrilla.findIndex(t => t.id === overTareaId);
 
                     // Validar índices
                     if (oldIndex === -1 || newIndex === -1) return;
-                    
+
                     // Si es la misma posición, no hacer nada
                     if (oldIndex === newIndex) return;
 
@@ -181,12 +181,12 @@ export default function ProyectoTablero({
 
                 // Si están en grillas diferentes, mover a la grilla de la tarea sobre la que se soltó
                 const nuevaGrillaId = overTarea.grilla_id;
-                
+
                 // Obtener todas las tareas de la grilla destino ordenadas por posición
                 const tareasEnNuevaGrilla = tareas
                     .filter(t => t.grilla_id === nuevaGrillaId && t.id !== tareaId)
                     .sort((a, b) => (a.position || 0) - (b.position || 0));
-                
+
                 // Encontrar la posición de inserción (donde está la tarea sobre la que se soltó)
                 const posicionDestino = tareasEnNuevaGrilla.findIndex(t => t.id === overTareaId);
                 const nuevaPosicion = posicionDestino !== -1 ? posicionDestino + 1 : tareasEnNuevaGrilla.length + 1;
@@ -261,42 +261,42 @@ export default function ProyectoTablero({
                 <h2 className="text-xl font-bold" style={{ color: proyecto.color }}>
                     {proyecto.name}
                 </h2>
-                <ButtonAdd 
-                    handleOpenModal={onOpenModalGrilla} 
-                    buttonText="+ Grilla" 
-                    colorButton="bg-green-500" 
+                <ButtonAdd
+                    handleOpenModal={onOpenModalGrilla}
+                    buttonText="+ Grilla"
+                    colorButton="bg-green-500"
                 />
             </div>
 
             <div className="flex flex-row h-full w-full overflow-x-auto flex-1">
-                <DndContext 
+                <DndContext
                     sensors={sensors}
                     collisionDetection={(args) => {
                         const activeId = String(args.active.id);
-                        
+
                         // Para grillas, usar rectIntersection y filtrar solo otras grillas
                         if (activeId.startsWith('grilla-')) {
                             const collisions = rectIntersection(args);
                             // Solo devolver colisiones con otras grillas (no tareas ni droppables)
                             return collisions.filter(collision => {
                                 const collisionId = String(collision.id);
-                                return collisionId.startsWith('grilla-') && 
-                                       collisionId !== activeId;
+                                return collisionId.startsWith('grilla-') &&
+                                    collisionId !== activeId;
                             });
                         }
-                        
+
                         // Para tareas, usar una estrategia híbrida
                         // Primero buscar colisiones con tareas usando closestCenter
                         const collisions = closestCenter(args);
-                        const tareaCollisions = collisions.filter(c => 
+                        const tareaCollisions = collisions.filter(c =>
                             String(c.id).startsWith('tarea-')
                         );
-                        
+
                         // Si hay colisión con otra tarea, darle prioridad sobre droppables
                         if (tareaCollisions.length > 0) {
                             return tareaCollisions;
                         }
-                        
+
                         // Si no hay tareas, buscar droppables usando rectIntersection (mejor para áreas grandes)
                         // Esto es especialmente importante para grillas vacías
                         const droppableCollisions = rectIntersection({
@@ -306,11 +306,11 @@ export default function ProyectoTablero({
                                 return id.startsWith('droppable-grilla-') || id.startsWith('droppable-tareas-grilla-');
                             }),
                         });
-                        
+
                         // Si hay colisiones con droppables, usarlas (prioridad para droppable-tareas-grilla)
                         if (droppableCollisions.length > 0) {
                             // Priorizar droppable-tareas-grilla sobre droppable-grilla
-                            const tareasDroppable = droppableCollisions.filter(c => 
+                            const tareasDroppable = droppableCollisions.filter(c =>
                                 String(c.id).startsWith('droppable-tareas-grilla-')
                             );
                             if (tareasDroppable.length > 0) {
@@ -318,16 +318,16 @@ export default function ProyectoTablero({
                             }
                             return droppableCollisions;
                         }
-                        
+
                         // También buscar droppables en las colisiones normales
                         const droppableInCollisions = collisions.filter(c => {
                             const id = String(c.id);
                             return id.startsWith('droppable-grilla-') || id.startsWith('droppable-tareas-grilla-');
                         });
-                        
+
                         if (droppableInCollisions.length > 0) {
                             // Priorizar droppable-tareas-grilla
-                            const tareasDroppable = droppableInCollisions.filter(c => 
+                            const tareasDroppable = droppableInCollisions.filter(c =>
                                 String(c.id).startsWith('droppable-tareas-grilla-')
                             );
                             if (tareasDroppable.length > 0) {
@@ -335,7 +335,7 @@ export default function ProyectoTablero({
                             }
                             return droppableInCollisions;
                         }
-                        
+
                         // Si no, devolver todas las colisiones
                         return collisions;
                     }}
@@ -343,8 +343,8 @@ export default function ProyectoTablero({
                     onDragEnd={handleDragEnd}
                 >
                     {grillas.length > 0 ? (
-                        <SortableContext 
-                            items={grillas.map(g => `grilla-${g.id}`)} 
+                        <SortableContext
+                            items={grillas.map(g => `grilla-${g.id}`)}
                             strategy={horizontalListSortingStrategy}
                         >
                             <div className="flex flex-row gap-2 w-full h-full">
@@ -355,13 +355,13 @@ export default function ProyectoTablero({
                                     const tareaItems = tareasDeGrilla.map(t => `tarea-${t.id}`);
                                     // SortableContext puede funcionar con arrays vacíos, pero necesitamos asegurarnos de que siempre se renderice
                                     return (
-                                        <SortableContext 
+                                        <SortableContext
                                             key={grilla.id}
-                                            items={tareaItems} 
+                                            items={tareaItems}
                                             strategy={verticalListSortingStrategy}
                                         >
-                                            <Grillas 
-                                                grilla={grilla} 
+                                            <Grillas
+                                                grilla={grilla}
                                                 onDelete={handleDeleteGrilla}
                                                 handleOpenModal={() => onOpenModalTarea(grilla.id)}
                                                 tareas={tareas}
@@ -374,7 +374,7 @@ export default function ProyectoTablero({
                         </SortableContext>
                     ) : (
                         <div className="flex items-center justify-center w-full">
-                            <p className="text-gray-500">No hay grillas. Haz clic en el botón para agregar una.</p>
+                            <p className="text-gray-500">No hay grillas. Haz clic en el botón para agregar.</p>
                         </div>
                     )}
                     <DragOverlay>
@@ -415,11 +415,10 @@ export default function ProyectoTablero({
                                                 <p className="text-xs text-gray-600 mb-1 line-clamp-2">{tarea.description}</p>
                                             )}
                                             {tarea.priority && (
-                                                <span className={`text-xs px-2 py-1 rounded ${
-                                                    tarea.priority === 'Alta' ? 'bg-red-100 text-red-700' :
-                                                    tarea.priority === 'Media' ? 'bg-yellow-100 text-yellow-700' :
-                                                    'bg-green-100 text-green-700'
-                                                }`}>
+                                                <span className={`text-xs px-2 py-1 rounded ${tarea.priority === 'Alta' ? 'bg-red-100 text-red-700' :
+                                                        tarea.priority === 'Media' ? 'bg-yellow-100 text-yellow-700' :
+                                                            'bg-green-100 text-green-700'
+                                                    }`}>
                                                     {tarea.priority}
                                                 </span>
                                             )}

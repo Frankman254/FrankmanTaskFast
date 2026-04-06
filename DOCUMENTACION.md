@@ -655,3 +655,5 @@ R: No. Entiende los conceptos. La sintaxis la aprendes con práctica.
 
 *Si tienes dudas sobre alguna parte específica del código, busca en la documentación oficial primero, luego pregunta en comunidades.*
 
+
+
