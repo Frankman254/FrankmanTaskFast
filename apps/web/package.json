@@ -21,8 +21,7 @@
 		"@frankman-task-fast/config": "*",
 		"@frankman-task-fast/types": "*",
 		"react": "^19.1.1",
-		"react-dom": "^19.1.1",
-		"react-router-dom": "^6.28.0"
+		"react-dom": "^19.1.1"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.33.0",

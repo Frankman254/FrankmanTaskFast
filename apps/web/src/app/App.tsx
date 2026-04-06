@@ -1,24 +1,19 @@
 import { type FC } from 'react';
 
-import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import BodyFull from '@/components/BodyFull';
-import SnowFlake from '@/components/SnowFlake';
 
 const App: FC = () => {
 	return (
-		<>
-			<SnowFlake />
-			<div className="min-h-screen flex flex-col justify-between">
-				<Header className="" />
-				<div className="flex flex-col justify-center bg-gray-100 max-w-[2000px]">
-					<main className="">
-						<BodyFull className="" />
-					</main>
-				</div>
-				<Footer className="w-full mb-0" />
-			</div>
-		</>
+		<div className="min-h-screen flex flex-col bg-surface-primary text-content-primary transition-colors duration-300">
+			<Header />
+			<main className="flex-1 overflow-hidden">
+				<BodyFull />
+			</main>
+			<footer className="border-t border-gray-200 dark:border-gray-800 py-3 px-6 text-center text-xs text-content-tertiary">
+				{import.meta.env.VITE_APP_NAME} &middot; {import.meta.env.VITE_APP_DESCRIPTION}
+			</footer>
+		</div>
 	);
 };
 

@@ -1,47 +1,34 @@
 import { useState } from "react";
-import RightBar from "./RightBar";
 import type { Grilla, Tarea } from "../types/models";
 import type { Proyecto } from "../types/models";
 import FormNewProyect from "./FormNewProyect";
 import FormAddTarea from "./FormAddTarea";
-import ButtonAddGrilla from "./ButtonAdd";
+import ButtonAdd from "./ButtonAdd";
 import ProyectoTablero from "./ProyectoTablero";
 import { grillasDefault, proyectosDefault, tareasDefault } from "../data_default/dataDefault";
 import FormNewGrilla from "./FormNewGrilla";
+import Modal from "./Modal";
 
-interface BodyFullProps {
-    className?: string;
-}
-
-export default function BodyFull({ className = '' }: BodyFullProps) {
+export default function BodyFull() {
     const [isModalOpenProyecto, setIsModalOpenProyecto] = useState(false);
     const [isModalOpenTarea, setIsModalOpenTarea] = useState(false);
     const [isModalOpenGrilla, setIsModalOpenGrilla] = useState(false);
     const [grillaSeleccionadaParaTarea, setGrillaSeleccionadaParaTarea] = useState<number | null>(null);
     const [proyectos, setProyectos] = useState<Proyecto[]>(proyectosDefault);
     
-    // Inicializar proyecto activo con el primer proyecto si hay proyectos default
     const [proyectoActivo, setProyectoActivo] = useState<number | null>(
         proyectosDefault.length > 0 ? proyectosDefault[0].id : null
     );
     
-    // Asignar grillas default a proyectos (distribuir las grillas entre los proyectos)
-    const grillasConProyecto = grillasDefault.map((grilla, index) => ({
-        ...grilla,
-        proyect_id: proyectosDefault[index % proyectosDefault.length]?.id || undefined,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-    }));
-    
-    // Todas las grillas de todos los proyectos
-    const [todasLasGrillas, setTodasLasGrillas] = useState<Grilla[]>(grillasConProyecto);
-    
-    // Todas las tareas de todos los proyectos
+    // Grillas already have proyect_id in defaults
+    const [todasLasGrillas, setTodasLasGrillas] = useState<Grilla[]>(
+        grillasDefault.map(g => ({
+            ...g,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        }))
+    );
     const [todasLasTareas, setTodasLasTareas] = useState<Tarea[]>(tareasDefault);
-
-    const handleOpenModalProyecto = () => {
-        setIsModalOpenProyecto(!isModalOpenProyecto);
-    };
 
     const handleAddProyecto = (nuevoProyecto: Proyecto) => {
         setProyectos(prevProyectos => {
@@ -53,7 +40,6 @@ export default function BodyFull({ className = '' }: BodyFullProps) {
                 updated_at: new Date().toISOString(),
             };
             
-            // Si es el primer proyecto, activarlo automáticamente
             if (prevProyectos.length === 0) {
                 setProyectoActivo(newId);
             }
@@ -63,42 +49,34 @@ export default function BodyFull({ className = '' }: BodyFullProps) {
         setIsModalOpenProyecto(false);
     };
 
-    // Obtener las grillas del proyecto activo
     const grillasDelProyectoActivo = todasLasGrillas.filter(
         g => g.proyect_id === proyectoActivo
     );
 
-    // Obtener el siguiente ID único para grillas
     const getNextGrillaId = () => {
         if (todasLasGrillas.length === 0) return 1;
         return Math.max(...todasLasGrillas.map(g => g.id)) + 1;
     };
 
-    // Actualizar las grillas de un proyecto específico
     const handleUpdateGrillas = (proyectoId: number, nuevasGrillas: Grilla[]) => {
         setTodasLasGrillas(prevGrillas => {
-            // Eliminar las grillas del proyecto
             const grillasSinProyecto = prevGrillas.filter(g => g.proyect_id !== proyectoId);
-            // Agregar las nuevas grillas
             return [...grillasSinProyecto, ...nuevasGrillas];
         });
     };
 
     const proyectoSeleccionado = proyectos.find(p => p.id === proyectoActivo);
     
-    // Obtener las tareas del proyecto activo (filtrando por grillas del proyecto)
     const grillasIdsDelProyecto = grillasDelProyectoActivo.map(g => g.id);
     const tareasDelProyectoActivo = todasLasTareas.filter((tarea: Tarea) => 
         grillasIdsDelProyecto.includes(tarea.grilla_id)
     );
 
-    // Obtener el siguiente ID único para tareas
     const getNextTareaId = () => {
         if (todasLasTareas.length === 0) return 1;
         return Math.max(...todasLasTareas.map(t => t.id)) + 1;
     };
 
-    // Actualizar las tareas
     const handleUpdateTareas = (nuevasTareas: Tarea[]) => {
         setTodasLasTareas(nuevasTareas);
     };
@@ -125,17 +103,12 @@ export default function BodyFull({ className = '' }: BodyFullProps) {
     };
 
     const handleOpenModalTarea = (grillaId: number) => {
-        if (isModalOpenTarea && grillaSeleccionadaParaTarea === grillaId) {
-            setIsModalOpenTarea(false);
-            setGrillaSeleccionadaParaTarea(null);
-        } else {
-            setGrillaSeleccionadaParaTarea(grillaId);
-            setIsModalOpenTarea(true);
-        }
+        setGrillaSeleccionadaParaTarea(grillaId);
+        setIsModalOpenTarea(true);
     };
 
     const handleOpenModalGrilla = () => {
-        setIsModalOpenGrilla(!isModalOpenGrilla);
+        setIsModalOpenGrilla(true);
     };
 
     const handleAddGrilla = (nuevaGrilla: Grilla) => {
@@ -157,97 +130,114 @@ export default function BodyFull({ className = '' }: BodyFullProps) {
     };
 
     return (
-        <div className={`flex flex-col h-[calc(80vh-100px)] ${className}`}>
-            {/* Barra lateral */}
-            <div className="flex flex-row h-full">
-                {isModalOpenProyecto ? (
-                    <FormNewProyect 
-                        className="min-w-[350px]" 
-                        onAdd={handleAddProyecto} 
-                    />
-                ) : isModalOpenTarea ? (
-                    <FormAddTarea 
-                        className="min-w-[350px]" 
-                        onAdd={handleAddTarea} 
-                    />
-                ) : isModalOpenGrilla ? (
-                    <FormNewGrilla 
-                        className="min-w-[350px]" 
-                        onAdd={handleAddGrilla} 
+        <div className="flex flex-col h-[calc(100vh-7rem)]">
+            {/* Project tabs bar */}
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm overflow-x-auto">
+                <ButtonAdd 
+                    handleOpenModal={() => setIsModalOpenProyecto(true)} 
+                    buttonText="+ Proyecto" 
+                />
+                
+                <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
+
+                {proyectos.map((proyecto) => (
+                    <button
+                        key={proyecto.id}
+                        onClick={() => setProyectoActivo(proyecto.id)}
+                        className={`px-4 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                            proyectoActivo === proyecto.id
+                                ? 'text-white shadow-md scale-[1.02]'
+                                : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                        }`}
+                        style={
+                            proyectoActivo === proyecto.id
+                                ? { backgroundColor: proyecto.color }
+                                : undefined
+                        }
+                    >
+                        {proyecto.name}
+                    </button>
+                ))}
+            </div>
+
+            {/* Main content area - full width, no sidebar */}
+            <div className="flex-1 overflow-hidden px-4 py-3">
+                {proyectoActivo && proyectoSeleccionado ? (
+                    <ProyectoTablero
+                        proyecto={proyectoSeleccionado}
+                        grillas={grillasDelProyectoActivo}
+                        onUpdateGrillas={(nuevasGrillas) => 
+                            handleUpdateGrillas(proyectoActivo, nuevasGrillas)
+                        }
+                        getNextGrillaId={getNextGrillaId}
+                        className="h-full"
+                        tareas={tareasDelProyectoActivo}
+                        onUpdateTareas={handleUpdateTareas}
+                        getNextTareaId={getNextTareaId}
+                        onOpenModalTarea={handleOpenModalTarea}
+                        onOpenModalGrilla={handleOpenModalGrilla}
                     />
                 ) : (
-                    <RightBar className="min-w-[350px]" />
-                )}
-                
-                {/* Área principal */}
-                <div className="flex flex-col flex-1 h-full">
-                    {/* Barra de pestañas de proyectos */}
-                    <div className="flex items-center gap-2 p-2 border-b-2 border-gray-200 bg-gray-50 overflow-x-auto">
-                        <ButtonAddGrilla 
-                            handleOpenModal={handleOpenModalProyecto} 
-                            buttonText="+ Proyecto" 
-                            colorButton="bg-green-500" 
-                        />
-                        
-                        {proyectos.map((proyecto) => (
-                            <button
-                                key={proyecto.id}
-                                onClick={() => setProyectoActivo(proyecto.id)}
-                                className={`px-4 py-2 rounded-t-lg font-semibold transition-all whitespace-nowrap ${
-                                    proyectoActivo === proyecto.id
-                                        ? 'bg-white border-t-2 border-l-2 border-r-2 border-b-0 shadow-md'
-                                        : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
-                                style={{
-                                    borderTopColor: proyectoActivo === proyecto.id ? proyecto.color : 'transparent',
-                                    borderLeftColor: proyectoActivo === proyecto.id ? proyecto.color : 'transparent',
-                                    borderRightColor: proyectoActivo === proyecto.id ? proyecto.color : 'transparent',
-                                    color: proyectoActivo === proyecto.id ? proyecto.color : '#666',
-                                }}
-                            >
-                                {proyecto.name}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Contenido del proyecto activo */}
-                    <div className="flex-1 overflow-hidden">
-                        {proyectoActivo && proyectoSeleccionado ? (
-                            <ProyectoTablero
-                                proyecto={proyectoSeleccionado}
-                                grillas={grillasDelProyectoActivo}
-                                onUpdateGrillas={(nuevasGrillas) => 
-                                    handleUpdateGrillas(proyectoActivo, nuevasGrillas)
-                                }
-                                getNextGrillaId={getNextGrillaId}
-                                className="h-full"
-                                tareas={tareasDelProyectoActivo}
-                                onUpdateTareas={handleUpdateTareas}
-                                getNextTareaId={getNextTareaId}
-                                onOpenModalTarea={handleOpenModalTarea}
-                                onOpenModalGrilla={handleOpenModalGrilla}
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center h-full">
-                                <div className="text-center">
-                                    <p className="text-gray-500 text-lg mb-4">
-                                        {proyectos.length === 0 
-                                            ? "No hay proyectos. Crea uno para comenzar." 
-                                            : "Selecciona un proyecto para ver su tablero."}
-                                    </p>
-                                    {proyectos.length === 0 && (
-                                        <ButtonAddGrilla 
-                                            handleOpenModal={handleOpenModalProyecto} 
-                                            buttonText="Crear Primer Proyecto" 
-                                            colorButton="bg-green-500" 
-                                        />
-                                    )}
-                                </div>
+                    <div className="flex items-center justify-center h-full">
+                        <div className="text-center animate-fadeIn">
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <span className="text-3xl">📋</span>
                             </div>
-                        )}
+                            <p className="text-gray-500 dark:text-gray-400 text-lg mb-4 font-medium">
+                                {proyectos.length === 0 
+                                    ? "No hay proyectos. Crea uno para comenzar." 
+                                    : "Selecciona un proyecto para ver su tablero."}
+                            </p>
+                            {proyectos.length === 0 && (
+                                <ButtonAdd 
+                                    handleOpenModal={() => setIsModalOpenProyecto(true)} 
+                                    buttonText="Crear Primer Proyecto" 
+                                />
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
+
+            {/* Modals */}
+            <Modal
+                isOpen={isModalOpenProyecto}
+                onClose={() => setIsModalOpenProyecto(false)}
+                title="Nuevo Proyecto"
+            >
+                <FormNewProyect 
+                    onAdd={handleAddProyecto}
+                    onClose={() => setIsModalOpenProyecto(false)}
+                />
+            </Modal>
+
+            <Modal
+                isOpen={isModalOpenGrilla}
+                onClose={() => setIsModalOpenGrilla(false)}
+                title="Nueva Grilla"
+            >
+                <FormNewGrilla 
+                    onAdd={handleAddGrilla}
+                    onClose={() => setIsModalOpenGrilla(false)}
+                />
+            </Modal>
+
+            <Modal
+                isOpen={isModalOpenTarea}
+                onClose={() => {
+                    setIsModalOpenTarea(false);
+                    setGrillaSeleccionadaParaTarea(null);
+                }}
+                title="Nueva Tarea"
+            >
+                <FormAddTarea 
+                    onAdd={handleAddTarea}
+                    onClose={() => {
+                        setIsModalOpenTarea(false);
+                        setGrillaSeleccionadaParaTarea(null);
+                    }}
+                />
+            </Modal>
         </div>
     );
 }

@@ -21,18 +21,20 @@ export default function Grillas({
 	onDelete,
 	handleOpenModal,
 	tareas,
-	onUpdateTareas,
 }: GrillasProps) {
-	const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+	// Sortable for the grid container (drag to reorder grids)
+	const { attributes, listeners, setNodeRef: setSortableRef, transform, transition, isDragging } =
 		useSortable({ 
 			id: `grilla-${grilla.id}`,
 			disabled: false,
 		});
 
-	const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+	// Droppable for the entire grid (fallback drop target)
+	const { setNodeRef: setDroppableRef, isOver: isOverGrid } = useDroppable({
 		id: `droppable-grilla-${grilla.id}`,
 	});
 
+	// Droppable specifically for the task area (primary drop target)
 	const { setNodeRef: setDroppableTareasRef, isOver: isOverTareas } = useDroppable({
 		id: `droppable-tareas-grilla-${grilla.id}`,
 	});
@@ -44,57 +46,56 @@ export default function Grillas({
 		zIndex: isDragging ? 50 : 1,
 	};
 
-	// Filtrar y ordenar tareas de esta grilla por posición
+	// Filter and sort tasks for this grid
 	const tareasDeEstaGrilla = tareas
 		.filter(t => t.grilla_id === grilla.id)
 		.sort((a, b) => (a.position || 0) - (b.position || 0));
 
-	// Combinar refs para sortable y droppable principal
-	const combinedRef = (node: HTMLDivElement | null) => {
-		setNodeRef(node);
-		setDroppableRef(node);
-	};
+	const isDropTarget = isOverGrid || isOverTareas;
 
 	return (
 		<div
-			ref={combinedRef}
+			ref={(node) => {
+				setSortableRef(node);
+				setDroppableRef(node);
+			}}
 			style={style}
 			{...attributes}
 			{...listeners}
-			className={`flex-1 min-w-[250px] max-w-[350px] py-1 h-full cursor-grab active:cursor-grabbing ${className}`}
+			className={`flex-1 min-w-[260px] max-w-[320px] py-1 h-full cursor-grab active:cursor-grabbing ${className}`}
 		>
 			<div
-				className={`border-4 border-spacing-y-96 border-gray-300 rounded-lg h-full flex flex-col items-start p-3 relative ${
-					(isOver || isOverTareas) ? 'ring-2 ring-blue-500' : ''
-				} ${isDragging ? 'shadow-2xl' : ''}`}
+				className={`rounded-xl h-full flex flex-col p-3 relative transition-all duration-200 ${
+					isDropTarget ? 'ring-2 ring-blue-400 ring-offset-2 dark:ring-offset-gray-900 scale-[1.02]' : ''
+				} ${isDragging ? 'shadow-2xl' : 'shadow-md'}`}
 				style={{ backgroundColor: grilla.color }}
-				onPointerDown={(e) => {
-					// Prevenir que las tareas activen el drag de la grilla
-					const target = e.target as HTMLElement;
-					if (target.closest('[data-sortable-tarea]') || target.closest('button')) {
-						e.stopPropagation();
-					}
-				}}
 			>
-				{/* Header de la grilla */}
-				<div className="w-full mb-2 pt-2">
-					<h2 className="text-lg font-semibold text-gray-800 text-center mb-1">
+				{/* Grid header */}
+				<div className="w-full mb-3 pt-1">
+					<h2 className="text-base font-bold text-white text-center mb-0.5 drop-shadow-sm">
 						{grilla.name}
 					</h2>
-					<div className="text-xs text-gray-600 text-center">
+					<div className="text-xs text-white/70 text-center font-medium">
 						{tareasDeEstaGrilla.length} {tareasDeEstaGrilla.length === 1 ? 'tarea' : 'tareas'}
 					</div>
 				</div>
 
-				{/* Área de tareas - scrollable y droppable */}
+				{/* Tasks area - scrollable and droppable */}
 				<div 
 					ref={setDroppableTareasRef}
-					className={`flex-1 w-full overflow-y-auto overflow-x-hidden pr-1 min-h-[100px] ${
-						isOverTareas ? 'ring-2 ring-blue-500 ring-inset bg-blue-100 bg-opacity-50' : ''
-					} ${isOver && !isOverTareas ? 'ring-2 ring-blue-400' : ''}`}
+					className={`flex-1 w-full overflow-y-auto overflow-x-hidden pr-1 rounded-lg transition-all duration-200 ${
+						isOverTareas ? 'bg-white/20 ring-2 ring-white/40 ring-inset' : ''
+					} ${isOverGrid && !isOverTareas ? 'bg-white/10' : ''}`}
 					style={{ 
 						maxHeight: 'calc(100% - 100px)',
-						minHeight: '150px', // Asegurar altura mínima para mejor detección
+						minHeight: '120px',
+					}}
+					onPointerDown={(e) => {
+						// Prevent task interactions from triggering grid drag
+						const target = e.target as HTMLElement;
+						if (target.closest('[data-sortable-tarea]') || target.closest('button')) {
+							e.stopPropagation();
+						}
 					}}
 				>
 					{tareasDeEstaGrilla.length > 0 ? (
@@ -105,21 +106,23 @@ export default function Grillas({
 						))
 					) : (
 						<div 
-							className="text-center text-gray-500 text-xs py-4 h-full flex items-center justify-center"
-							style={{ minHeight: '150px' }}
+							className="text-center text-white/50 text-xs py-4 h-full flex items-center justify-center rounded-lg border-2 border-dashed border-white/20 transition-all duration-200"
+							style={{ minHeight: '120px' }}
 						>
-							{isOverTareas || isOver ? (
-								<span className="text-blue-600 font-semibold">Suelta la tarea aquí</span>
+							{isDropTarget ? (
+								<span className="text-white font-semibold text-sm animate-pulse">
+									↓ Suelta aquí
+								</span>
 							) : (
-								'No hay tareas'
+								<span>Sin tareas</span>
 							)}
 						</div>
 					)}
 				</div>
 
-				{/* Botones - no arrastrables */}
+				{/* Buttons - not draggable */}
 				<div 
-					className="absolute bottom-2 right-2 z-30 flex gap-2"
+					className="mt-2 flex gap-2 justify-end"
 					onClick={(e) => e.stopPropagation()}
 					onPointerDown={(e) => {
 						e.stopPropagation();
@@ -135,11 +138,10 @@ export default function Grillas({
 					}}
 					style={{ pointerEvents: 'auto' }}
 				>
-					<ButtonAdd handleOpenModal={handleOpenModal} buttonText="+ Tarea" colorButton="bg-green-500" className="text-xs px-2 py-1" />
+					<ButtonAdd handleOpenModal={handleOpenModal} buttonText="+ Tarea" colorButton="bg-white/20 hover:bg-white/30" className="text-xs px-3 py-1.5 text-white" />
 					<ButtonDeleteGrilla onDelete={onDelete} grilla={grilla} />
 				</div>
 			</div>
 		</div>
 	);
 }
-
