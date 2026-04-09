@@ -179,7 +179,7 @@ export default function ProyectoTablero({
 		: null;
 
 	return (
-		<div className={`flex flex-col h-full ${className}`}>
+		<div className={`flex flex-col min-h-[560px] ${className}`}>
 			<div
 				className="flex justify-between items-center mb-3 pb-4 border-b"
 				style={{ borderColor: `${proyecto.color}55` }}
@@ -199,7 +199,7 @@ export default function ProyectoTablero({
 				/>
 			</div>
 
-			<div className="flex flex-row h-full w-full overflow-x-auto flex-1 gap-4 pb-2">
+			<div className="flex flex-row w-full overflow-x-auto overflow-y-visible gap-4 pb-4">
 				<DndContext
 					sensors={sensors}
 					collisionDetection={collisionDetection}
@@ -211,7 +211,7 @@ export default function ProyectoTablero({
 							items={grillas.map((grilla) => `grilla-${grilla.id}`)}
 							strategy={horizontalListSortingStrategy}
 						>
-							<div className="flex flex-row gap-4 w-full h-full">
+							<div className="flex flex-row gap-4 w-full items-start">
 								{grillas.map((grilla) => {
 									const tareasDeGrilla = tareas
 										.filter((tarea) => tarea.grilla_id === grilla.id)

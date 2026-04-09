@@ -174,7 +174,7 @@ export default function BodyFull() {
 	};
 
 	return (
-		<div className="flex flex-col h-[calc(100vh-7rem)]">
+		<div className="flex flex-col min-h-[calc(100vh-7rem)]">
 			<div className="px-4 py-3 border-b border-white/10 bg-slate-950/60 backdrop-blur-xl overflow-x-auto">
 				<div className="flex items-center gap-3 mb-3">
 					<ButtonAdd
@@ -250,10 +250,10 @@ export default function BodyFull() {
 				)}
 			</div>
 
-			<div className="flex-1 overflow-hidden px-4 py-4">
+			<div className="flex-1 overflow-visible px-4 py-4">
 				{proyectoActivo && proyectoSeleccionado ? (
-					<div className="grid h-full gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-						<div className="min-w-0 flex flex-col overflow-hidden">
+					<div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] items-start">
+						<div className="min-w-0 flex flex-col">
 							<ProjectDashboard
 								proyecto={proyectoSeleccionado}
 								grillas={grillasDelProyectoActivo}
@@ -286,7 +286,7 @@ export default function BodyFull() {
 								onUpdateGrillas={(nuevasGrillas) =>
 									handleUpdateGrillas(proyectoActivo, nuevasGrillas)
 								}
-								className="flex-1 overflow-hidden"
+								className=""
 								tareas={tareasFiltradas}
 								onUpdateTareas={handleUpdateTareas}
 								onOpenModalTarea={handleOpenModalTarea}
@@ -299,7 +299,7 @@ export default function BodyFull() {
 							/>
 						</div>
 
-						<div className="hidden xl:block min-w-0">
+						<div className="hidden xl:block min-w-0 xl:sticky xl:top-24 self-start">
 							{tareaSeleccionada ? (
 								<TaskInspector
 									tarea={tareaSeleccionada}

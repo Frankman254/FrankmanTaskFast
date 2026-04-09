@@ -63,10 +63,10 @@ export default function Grillas({
 			style={style}
 			{...attributes}
 			{...listeners}
-			className={`flex-1 min-w-[280px] max-w-[340px] py-1 h-full cursor-grab active:cursor-grabbing ${className}`}
+			className={`flex-1 min-w-[280px] max-w-[340px] py-1 min-h-[560px] cursor-grab active:cursor-grabbing ${className}`}
 		>
 			<div
-				className={`rounded-[26px] h-full flex flex-col p-3.5 relative transition-all duration-200 ${
+				className={`rounded-[26px] min-h-[560px] flex flex-col p-3.5 relative transition-all duration-200 ${
 					isDropTarget ? 'ring-2 ring-cyan-300 ring-offset-2 dark:ring-offset-gray-950 scale-[1.01]' : ''
 				} ${isDragging ? 'shadow-2xl' : 'shadow-[0_20px_50px_rgba(15,23,42,0.35)]'}`}
 				style={{ backgroundColor: grilla.color }}
