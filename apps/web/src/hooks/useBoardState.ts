@@ -72,16 +72,6 @@ export const useBoardState = () => {
 		setBoard(localStorageBoardRepository.reorderTareas(proyectoId, nuevasTareas));
 	};
 
-	const getNextGrillaId = () => {
-		if (grillas.length === 0) return 1;
-		return Math.max(...grillas.map((grilla) => grilla.id)) + 1;
-	};
-
-	const getNextTareaId = () => {
-		if (tareas.length === 0) return 1;
-		return Math.max(...tareas.map((tarea) => tarea.id)) + 1;
-	};
-
 	return {
 		proyectos,
 		proyectoActivo,
@@ -94,7 +84,5 @@ export const useBoardState = () => {
 		addTarea,
 		updateGrillas,
 		updateTareas,
-		getNextGrillaId,
-		getNextTareaId,
 	};
 };

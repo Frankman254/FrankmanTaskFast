@@ -12,7 +12,6 @@ interface GrillasProps {
 	onDelete: (id: number) => void;
 	handleOpenModal: () => void;
 	tareas: Tarea[];
-	onUpdateTareas: (tareas: Tarea[]) => void;
 }
 
 export default function Grillas({

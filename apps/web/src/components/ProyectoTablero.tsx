@@ -1,20 +1,19 @@
 import ButtonAdd from "./ButtonAdd";
 import Grillas from "./Grillas";
-import { SortableContext, horizontalListSortingStrategy, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { SortableContext, horizontalListSortingStrategy, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor, pointerWithin, rectIntersection } from "@dnd-kit/core";
-import type { DragEndEvent, DragStartEvent, DragOverEvent, CollisionDetection } from "@dnd-kit/core";
+import type { DragEndEvent, DragStartEvent, CollisionDetection } from "@dnd-kit/core";
 import type { Grilla, Proyecto, Tarea } from "@frankman-task-fast/types";
 import { useState, useCallback } from "react";
+import { moveTaskOverTask, moveTaskToGridEnd, reorderGrillas } from "@/lib/board-dnd";
 
 interface ProyectoTableroProps {
     proyecto: Proyecto;
     grillas: Grilla[];
     onUpdateGrillas: (grillas: Grilla[]) => void;
-    getNextGrillaId: () => number;
     className?: string;
     tareas: Tarea[];
     onUpdateTareas: (tareas: Tarea[]) => void;
-    getNextTareaId: () => number;
     onOpenModalTarea: (grillaId: number) => void;
     onOpenModalGrilla: () => void;
 }
@@ -100,10 +99,6 @@ export default function ProyectoTablero({
         setActiveId(String(event.active.id));
     };
 
-    const handleDragOver = (_event: DragOverEvent) => {
-        // Visual feedback is handled by isOver states in Grillas component
-    };
-
     const handleDragEnd = (event: DragEndEvent) => {
         setActiveId(null);
         const { active, over } = event;
@@ -117,20 +112,14 @@ export default function ProyectoTablero({
         if (activeIdStr.startsWith('grilla-') && overId.startsWith('grilla-')) {
             const activeGrillaId = parseInt(activeIdStr.replace('grilla-', ''));
             const overGrillaId = parseInt(overId.replace('grilla-', ''));
+            const grillasActualizadas = reorderGrillas(grillas, activeGrillaId, overGrillaId);
 
-            if (activeGrillaId === overGrillaId) return;
-
-            const oldIndex = grillas.findIndex((item) => item.id === activeGrillaId);
-            const newIndex = grillas.findIndex((item) => item.id === overGrillaId);
-
-            const grillasReordenadas = arrayMove(grillas, oldIndex, newIndex);
-            const grillasActualizadas = grillasReordenadas.map((item, index) => ({
-                ...item,
-                position: index + 1,
-                updated_at: new Date().toISOString(),
-            }));
-
-            onUpdateGrillas(grillasActualizadas);
+            if (grillasActualizadas) {
+                onUpdateGrillas(grillasActualizadas.map((grilla) => ({
+                    ...grilla,
+                    updated_at: new Date().toISOString(),
+                })));
+            }
             return;
         }
 
@@ -146,113 +135,28 @@ export default function ProyectoTablero({
                 const nuevaGrillaId = parseInt(
                     overId.replace('droppable-tareas-grilla-', '').replace('droppable-grilla-', '')
                 );
-                
-                if (tarea.grilla_id === nuevaGrillaId) return;
+                const nuevasTareas = moveTaskToGridEnd(tareas, tareaId, nuevaGrillaId);
 
-                const tareasEnNuevaGrilla = tareas
-                    .filter(t => t.grilla_id === nuevaGrillaId && t.id !== tareaId)
-                    .sort((a, b) => (a.position || 0) - (b.position || 0));
-                
-                const nuevaPosicion = tareasEnNuevaGrilla.length + 1;
-
-                const nuevasTareas = tareas.map(t => {
-                    if (t.id === tareaId) {
-                        return {
-                            ...t,
-                            grilla_id: nuevaGrillaId,
-                            position: nuevaPosicion,
-                            updated_at: new Date().toISOString(),
-                        };
-                    }
-                    // Reorder positions in source grid
-                    if (t.grilla_id === tarea.grilla_id && t.id !== tareaId) {
-                        const tareasEnOrigen = tareas
-                            .filter(ta => ta.grilla_id === tarea.grilla_id && ta.id !== tareaId)
-                            .sort((a, b) => (a.position || 0) - (b.position || 0));
-                        const idx = tareasEnOrigen.findIndex(ta => ta.id === t.id);
-                        if (idx !== -1) {
-                            return { ...t, position: idx + 1, updated_at: new Date().toISOString() };
-                        }
-                    }
-                    return t;
-                });
-
-                onUpdateTareas(nuevasTareas);
+                if (nuevasTareas) {
+                    onUpdateTareas(nuevasTareas.map((item) => ({
+                        ...item,
+                        updated_at: new Date().toISOString(),
+                    })));
+                }
                 return;
             }
 
             // Dropped on another task
             if (overId.startsWith('tarea-')) {
                 const overTareaId = parseInt(overId.replace('tarea-', ''));
-                const overTarea = tareas.find(t => t.id === overTareaId);
-                
-                if (!overTarea) return;
+                const nuevasTareas = moveTaskOverTask(tareas, tareaId, overTareaId);
 
-                // Same grid: reorder
-                if (tarea.grilla_id === overTarea.grilla_id) {
-                    const tareasEnGrilla = tareas
-                        .filter(t => t.grilla_id === tarea.grilla_id)
-                        .sort((a, b) => (a.position || 0) - (b.position || 0));
-                    
-                    const oldIndex = tareasEnGrilla.findIndex(t => t.id === tareaId);
-                    const newIndex = tareasEnGrilla.findIndex(t => t.id === overTareaId);
-
-                    if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
-
-                    const tareasReordenadas = arrayMove(tareasEnGrilla, oldIndex, newIndex);
-
-                    const nuevasTareas = tareas.map(t => {
-                        if (t.grilla_id === tarea.grilla_id) {
-                            const idx = tareasReordenadas.findIndex(ta => ta.id === t.id);
-                            if (idx !== -1) {
-                                return { ...t, position: idx + 1, updated_at: new Date().toISOString() };
-                            }
-                        }
-                        return t;
-                    });
-
-                    onUpdateTareas(nuevasTareas);
-                    return;
+                if (nuevasTareas) {
+                    onUpdateTareas(nuevasTareas.map((item) => ({
+                        ...item,
+                        updated_at: new Date().toISOString(),
+                    })));
                 }
-
-                // Different grid: move to target grid at the position of the target task
-                const nuevaGrillaId = overTarea.grilla_id;
-                const tareasEnDestino = tareas
-                    .filter(t => t.grilla_id === nuevaGrillaId && t.id !== tareaId)
-                    .sort((a, b) => (a.position || 0) - (b.position || 0));
-                
-                const insertIndex = tareasEnDestino.findIndex(t => t.id === overTareaId);
-                const nuevasTareasEnDestino = [...tareasEnDestino];
-                nuevasTareasEnDestino.splice(
-                    insertIndex !== -1 ? insertIndex : nuevasTareasEnDestino.length,
-                    0,
-                    { ...tarea, grilla_id: nuevaGrillaId, position: 0, updated_at: new Date().toISOString() }
-                );
-
-                const nuevasTareas = tareas.map(t => {
-                    if (t.id === tareaId) {
-                        const idx = nuevasTareasEnDestino.findIndex(ta => ta.id === t.id);
-                        return { ...t, grilla_id: nuevaGrillaId, position: idx + 1, updated_at: new Date().toISOString() };
-                    }
-                    if (t.grilla_id === nuevaGrillaId && t.id !== tareaId) {
-                        const idx = nuevasTareasEnDestino.findIndex(ta => ta.id === t.id);
-                        if (idx !== -1) {
-                            return { ...t, position: idx + 1, updated_at: new Date().toISOString() };
-                        }
-                    }
-                    if (t.grilla_id === tarea.grilla_id && t.id !== tareaId) {
-                        const tareasEnOrigen = tareas
-                            .filter(ta => ta.grilla_id === tarea.grilla_id && ta.id !== tareaId)
-                            .sort((a, b) => (a.position || 0) - (b.position || 0));
-                        const idx = tareasEnOrigen.findIndex(ta => ta.id === t.id);
-                        if (idx !== -1) {
-                            return { ...t, position: idx + 1, updated_at: new Date().toISOString() };
-                        }
-                    }
-                    return t;
-                });
-
-                onUpdateTareas(nuevasTareas);
             }
         }
     };
@@ -294,7 +198,6 @@ export default function ProyectoTablero({
                     sensors={sensors}
                     collisionDetection={collisionDetection}
                     onDragStart={handleDragStart}
-                    onDragOver={handleDragOver}
                     onDragEnd={handleDragEnd}
                 >
                     {grillas.length > 0 ? (
@@ -319,7 +222,6 @@ export default function ProyectoTablero({
                                                 onDelete={handleDeleteGrilla}
                                                 handleOpenModal={() => onOpenModalTarea(grilla.id)}
                                                 tareas={tareas}
-                                                onUpdateTareas={onUpdateTareas}
                                             />
                                         </SortableContext>
                                     );

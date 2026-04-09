@@ -27,8 +27,6 @@ export default function BodyFull() {
         addTarea,
         updateGrillas,
         updateTareas,
-        getNextGrillaId,
-        getNextTareaId,
     } = useBoardState();
 
     const handleAddProyecto = (nuevoProyecto: Proyecto) => {
@@ -115,11 +113,9 @@ export default function BodyFull() {
                             onUpdateGrillas={(nuevasGrillas) => 
                                 handleUpdateGrillas(proyectoActivo, nuevasGrillas)
                             }
-                            getNextGrillaId={getNextGrillaId}
                             className="flex-1 overflow-hidden"
                             tareas={tareasDelProyectoActivo}
                             onUpdateTareas={handleUpdateTareas}
-                            getNextTareaId={getNextTareaId}
                             onOpenModalTarea={handleOpenModalTarea}
                             onOpenModalGrilla={handleOpenModalGrilla}
                         />
