@@ -1,8 +1,10 @@
+import type { Grilla, Proyecto, Tarea } from '@frankman-task-fast/types';
+
 const today = new Date();
 
 const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-export const proyectosDefault = [
+export const proyectosDefault: Proyecto[] = [
 	{
 		id: 1,
 		name: 'FARS Tech Solutions',
@@ -21,7 +23,7 @@ export const proyectosDefault = [
 	},
 ];
 
-export const grillasDefault = [
+export const grillasDefault: Grilla[] = [
 	{
 		id: 1,
 		name: 'Por Hacer',
@@ -72,7 +74,7 @@ export const grillasDefault = [
 	},
 ];
 
-export const tareasDefault = [
+export const tareasDefault: Tarea[] = [
 	{
 		id: 1,
 		grilla_id: 1,
