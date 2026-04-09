@@ -1,47 +1,72 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback, useEffect } from "react";
 
 interface ModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	title: string;
 	children: React.ReactNode;
+	showHeader?: boolean;
+	contentClassName?: string;
+	overlayClassName?: string;
 }
 
-export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
-	const handleKeyDown = useCallback((e: KeyboardEvent) => {
-		if (e.key === 'Escape') onClose();
-	}, [onClose]);
+export default function Modal({
+	isOpen,
+	onClose,
+	title,
+	children,
+	showHeader = true,
+	contentClassName = "",
+	overlayClassName = "",
+}: ModalProps) {
+	const handleKeyDown = useCallback(
+		(event: KeyboardEvent) => {
+			if (event.key === "Escape") {
+				onClose();
+			}
+		},
+		[onClose]
+	);
 
 	useEffect(() => {
-		if (isOpen) {
-			document.addEventListener('keydown', handleKeyDown);
-			document.body.style.overflow = 'hidden';
+		if (!isOpen) {
+			return;
 		}
+
+		document.addEventListener("keydown", handleKeyDown);
+		document.body.style.overflow = "hidden";
+
 		return () => {
-			document.removeEventListener('keydown', handleKeyDown);
-			document.body.style.overflow = '';
+			document.removeEventListener("keydown", handleKeyDown);
+			document.body.style.overflow = "";
 		};
-	}, [isOpen, handleKeyDown]);
+	}, [handleKeyDown, isOpen]);
 
 	if (!isOpen) return null;
 
 	return (
-		<div 
-			className="modal-overlay"
-			onClick={(e) => {
-				if (e.target === e.currentTarget) onClose();
+		<div
+			className={`modal-overlay ${overlayClassName}`.trim()}
+			onClick={(event) => {
+				if (event.target === event.currentTarget) {
+					onClose();
+				}
 			}}
 		>
-			<div className="modal-content animate-scaleIn">
-				<div className="flex items-center justify-between mb-5">
-					<h2 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h2>
-					<button
-						onClick={onClose}
-						className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
-					>
-						✕
-					</button>
-				</div>
+			<div className={`modal-content animate-scaleIn ${contentClassName}`.trim()}>
+				{showHeader && (
+					<div className="mb-5 flex items-center justify-between">
+						<h2 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h2>
+						<button
+							type="button"
+							onClick={onClose}
+							className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+						>
+							<span className="sr-only">Cerrar modal</span>
+							&times;
+						</button>
+					</div>
+				)}
 				{children}
 			</div>
 		</div>

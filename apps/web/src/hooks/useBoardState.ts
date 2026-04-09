@@ -63,6 +63,10 @@ export const useBoardState = () => {
 		setBoard(localStorageBoardRepository.updateGrilla(grillaId, changes));
 	};
 
+	const deleteGrilla = (grillaId: number) => {
+		setBoard(localStorageBoardRepository.deleteGrilla(grillaId));
+	};
+
 	const addTarea = (grillaId: number, tarea: Tarea) => {
 		setBoard(
 			localStorageBoardRepository.createTarea(grillaId, {
@@ -108,6 +112,7 @@ export const useBoardState = () => {
 		updateProyecto,
 		addGrilla,
 		updateGrilla,
+		deleteGrilla,
 		addTarea,
 		updateTarea,
 		deleteTarea,
