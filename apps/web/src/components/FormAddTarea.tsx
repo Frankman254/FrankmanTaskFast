@@ -4,25 +4,34 @@ import type { PrioridadTarea, Tarea } from "@frankman-task-fast/types";
 interface FormAddTareaProps {
 	onAdd: (tarea: Tarea) => void;
 	onClose: () => void;
+	initialValue?: Tarea | null;
+	submitLabel?: string;
 }
 
 const today = new Date().toISOString().split('T')[0];
 
-export default function FormAddTarea({ onAdd, onClose }: FormAddTareaProps) {
-	const [tarea, setTarea] = useState<Tarea>({
-		id: Date.now(),
-		grilla_id: 0,
-		title: '',
-		description: '',
-		position: 0,
-		assigned_to: 1,
-		start_date: today,
-		due_date: '',
-		priority: 'Media',
-		created_by: 1,
-		created_at: new Date().toISOString(),
-		updated_at: new Date().toISOString(),
-	});
+export default function FormAddTarea({
+	onAdd,
+	onClose,
+	initialValue,
+	submitLabel = 'Crear Tarea',
+}: FormAddTareaProps) {
+	const [tarea, setTarea] = useState<Tarea>(
+		initialValue ?? {
+			id: Date.now(),
+			grilla_id: 0,
+			title: '',
+			description: '',
+			position: 0,
+			assigned_to: 1,
+			start_date: today,
+			due_date: '',
+			priority: 'Media',
+			created_by: 1,
+			created_at: new Date().toISOString(),
+			updated_at: new Date().toISOString(),
+		}
+	);
 	const [error, setError] = useState('');
 
 	const priorities: { value: PrioridadTarea; label: string; color: string }[] = [
@@ -68,7 +77,7 @@ export default function FormAddTarea({ onAdd, onClose }: FormAddTareaProps) {
 			...tarea,
 			title: trimmedTitle,
 			description: tarea.description.trim(),
-			created_at: new Date().toISOString(),
+			created_at: tarea.created_at ?? new Date().toISOString(),
 			updated_at: new Date().toISOString(),
 		});
 		onClose();
@@ -197,7 +206,7 @@ export default function FormAddTarea({ onAdd, onClose }: FormAddTareaProps) {
 					disabled={isSubmitDisabled}
 					className="flex-1 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors cursor-pointer shadow-sm"
 				>
-					Crear Tarea
+					{submitLabel}
 				</button>
 			</div>
 		</form>

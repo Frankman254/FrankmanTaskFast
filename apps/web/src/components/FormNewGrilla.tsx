@@ -1,20 +1,36 @@
-import type { Grilla } from "@frankman-task-fast/types";
+import type { Grilla, TipoGrilla } from "@frankman-task-fast/types";
 import { useState } from "react";
 
 interface FormNewGrillaProps {
 	onAdd: (grilla: Grilla) => void;
 	onClose: () => void;
+	initialValue?: Grilla | null;
+	submitLabel?: string;
 }
 
-export default function FormNewGrilla({ onAdd, onClose }: FormNewGrillaProps) {
-	const [grilla, setGrilla] = useState<Grilla>({
-		id: Date.now(),
-		name: '',
-		color: '#6366f1',
-		position: 0,
-		proyect_id: 0,
-		tipo: 'custom',
-	});
+const tiposGrilla: { value: TipoGrilla; label: string }[] = [
+	{ value: 'todo', label: 'Por hacer' },
+	{ value: 'doing', label: 'En curso' },
+	{ value: 'done', label: 'Hecho' },
+	{ value: 'custom', label: 'Custom' },
+];
+
+export default function FormNewGrilla({
+	onAdd,
+	onClose,
+	initialValue,
+	submitLabel = 'Crear Grilla',
+}: FormNewGrillaProps) {
+	const [grilla, setGrilla] = useState<Grilla>(
+		initialValue ?? {
+			id: Date.now(),
+			name: '',
+			color: '#6366f1',
+			position: 0,
+			proyect_id: 0,
+			tipo: 'custom',
+		}
+	);
 	const [error, setError] = useState('');
 
 	const gridName = grilla.name.trim();
@@ -28,12 +44,8 @@ export default function FormNewGrilla({ onAdd, onClose }: FormNewGrillaProps) {
 		}
 
 		onAdd({
-			id: Date.now(),
+			...grilla,
 			name: gridName,
-			color: grilla.color,
-			position: grilla.position,
-			proyect_id: grilla.proyect_id,
-			tipo: grilla.tipo,
 		});
 		onClose();
 	};
@@ -73,6 +85,28 @@ export default function FormNewGrilla({ onAdd, onClose }: FormNewGrillaProps) {
 					className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
 					autoFocus
 				/>
+			</div>
+
+			<div>
+				<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+					Tipo de grilla
+				</label>
+				<div className="grid grid-cols-2 gap-2">
+					{tiposGrilla.map((tipo) => (
+						<button
+							key={tipo.value}
+							type="button"
+							onClick={() => setGrilla({ ...grilla, tipo: tipo.value })}
+							className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+								grilla.tipo === tipo.value
+									? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+									: 'border-gray-300 text-gray-500 dark:border-gray-700 dark:text-gray-400'
+							}`}
+						>
+							{tipo.label}
+						</button>
+					))}
+				</div>
 			</div>
 
 			<div>
@@ -127,7 +161,7 @@ export default function FormNewGrilla({ onAdd, onClose }: FormNewGrillaProps) {
 					disabled={isSubmitDisabled}
 					className="flex-1 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors cursor-pointer shadow-sm"
 				>
-					Crear Grilla
+					{submitLabel}
 				</button>
 			</div>
 		</form>

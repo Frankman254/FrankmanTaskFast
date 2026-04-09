@@ -39,6 +39,13 @@ export const useBoardState = () => {
 		);
 	};
 
+	const updateProyecto = (
+		proyectoId: number,
+		changes: Partial<Omit<Proyecto, 'id' | 'created_at' | 'updated_at'>>
+	) => {
+		setBoard(localStorageBoardRepository.updateProyecto(proyectoId, changes));
+	};
+
 	const addGrilla = (proyectoId: number, grilla: Grilla) => {
 		setBoard(
 			localStorageBoardRepository.createGrilla(proyectoId, {
@@ -47,6 +54,13 @@ export const useBoardState = () => {
 				tipo: grilla.tipo,
 			})
 		);
+	};
+
+	const updateGrilla = (
+		grillaId: number,
+		changes: Partial<Omit<Grilla, 'id' | 'proyect_id' | 'position' | 'created_at' | 'updated_at'>>
+	) => {
+		setBoard(localStorageBoardRepository.updateGrilla(grillaId, changes));
 	};
 
 	const addTarea = (grillaId: number, tarea: Tarea) => {
@@ -62,6 +76,17 @@ export const useBoardState = () => {
 				history: tarea.history,
 			})
 		);
+	};
+
+	const updateTarea = (
+		tareaId: number,
+		changes: Partial<Omit<Tarea, 'id' | 'grilla_id' | 'position' | 'created_at' | 'updated_at'>>
+	) => {
+		setBoard(localStorageBoardRepository.updateTarea(tareaId, changes));
+	};
+
+	const deleteTarea = (tareaId: number) => {
+		setBoard(localStorageBoardRepository.deleteTarea(tareaId));
 	};
 
 	const updateGrillas = (proyectoId: number, nuevasGrillas: Grilla[]) => {
@@ -80,8 +105,12 @@ export const useBoardState = () => {
 		tareasDelProyectoActivo,
 		selectProyecto,
 		addProyecto,
+		updateProyecto,
 		addGrilla,
+		updateGrilla,
 		addTarea,
+		updateTarea,
+		deleteTarea,
 		updateGrillas,
 		updateTareas,
 	};

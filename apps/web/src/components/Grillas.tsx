@@ -2,6 +2,8 @@ import type { Grilla, Tarea } from "@frankman-task-fast/types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useDroppable } from "@dnd-kit/core";
+import { PencilLine } from "lucide-react";
+
 import ButtonDeleteGrilla from "./ButtonDeleteGrilla";
 import ButtonAdd from "./ButtonAdd";
 import TareaComponent from "./Tarea";
@@ -10,30 +12,31 @@ interface GrillasProps {
 	grilla: Grilla;
 	className?: string;
 	onDelete: (id: number) => void;
+	onEdit: (grilla: Grilla) => void;
 	handleOpenModal: () => void;
 	tareas: Tarea[];
+	onSelectTask: (tarea: Tarea) => void;
 }
 
 export default function Grillas({
 	grilla,
 	className = '',
 	onDelete,
+	onEdit,
 	handleOpenModal,
 	tareas,
+	onSelectTask,
 }: GrillasProps) {
-	// Sortable for the grid container (drag to reorder grids)
 	const { attributes, listeners, setNodeRef: setSortableRef, transform, transition, isDragging } =
-		useSortable({ 
+		useSortable({
 			id: `grilla-${grilla.id}`,
 			disabled: false,
 		});
 
-	// Droppable for the entire grid (fallback drop target)
 	const { setNodeRef: setDroppableRef, isOver: isOverGrid } = useDroppable({
 		id: `droppable-grilla-${grilla.id}`,
 	});
 
-	// Droppable specifically for the task area (primary drop target)
 	const { setNodeRef: setDroppableTareasRef, isOver: isOverTareas } = useDroppable({
 		id: `droppable-tareas-grilla-${grilla.id}`,
 	});
@@ -45,9 +48,8 @@ export default function Grillas({
 		zIndex: isDragging ? 50 : 1,
 	};
 
-	// Filter and sort tasks for this grid
 	const tareasDeEstaGrilla = tareas
-		.filter(t => t.grilla_id === grilla.id)
+		.filter((tarea) => tarea.grilla_id === grilla.id)
 		.sort((a, b) => (a.position || 0) - (b.position || 0));
 
 	const isDropTarget = isOverGrid || isOverTareas;
@@ -61,36 +63,55 @@ export default function Grillas({
 			style={style}
 			{...attributes}
 			{...listeners}
-			className={`flex-1 min-w-[260px] max-w-[320px] py-1 h-full cursor-grab active:cursor-grabbing ${className}`}
+			className={`flex-1 min-w-[280px] max-w-[340px] py-1 h-full cursor-grab active:cursor-grabbing ${className}`}
 		>
 			<div
-				className={`rounded-xl h-full flex flex-col p-3 relative transition-all duration-200 ${
-					isDropTarget ? 'ring-2 ring-blue-400 ring-offset-2 dark:ring-offset-gray-900 scale-[1.02]' : ''
-				} ${isDragging ? 'shadow-2xl' : 'shadow-md'}`}
+				className={`rounded-[26px] h-full flex flex-col p-3.5 relative transition-all duration-200 ${
+					isDropTarget ? 'ring-2 ring-cyan-300 ring-offset-2 dark:ring-offset-gray-950 scale-[1.01]' : ''
+				} ${isDragging ? 'shadow-2xl' : 'shadow-[0_20px_50px_rgba(15,23,42,0.35)]'}`}
 				style={{ backgroundColor: grilla.color }}
 			>
-				{/* Grid header */}
 				<div className="w-full mb-3 pt-1">
-					<h2 className="text-base font-bold text-white text-center mb-0.5 drop-shadow-sm">
-						{grilla.name}
-					</h2>
-					<div className="text-xs text-white/70 text-center font-medium">
-						{tareasDeEstaGrilla.length} {tareasDeEstaGrilla.length === 1 ? 'tarea' : 'tareas'}
+					<div className="flex items-start justify-between gap-3">
+						<div>
+							<p className="text-[10px] uppercase tracking-[0.25em] text-white/60 mb-1">
+								{grilla.tipo}
+							</p>
+							<h2 className="text-base font-bold text-white mb-0.5 drop-shadow-sm">
+								{grilla.name}
+							</h2>
+							<div className="text-xs text-white/70 font-medium">
+								{tareasDeEstaGrilla.length} {tareasDeEstaGrilla.length === 1 ? 'tarea' : 'tareas'}
+							</div>
+						</div>
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onEdit(grilla);
+							}}
+							onPointerDown={(e) => {
+								e.stopPropagation();
+								e.preventDefault();
+							}}
+							className="shrink-0 rounded-full bg-white/15 hover:bg-white/25 text-white p-2 transition-colors"
+							title="Editar grilla"
+						>
+							<PencilLine className="w-3.5 h-3.5" />
+						</button>
 					</div>
 				</div>
 
-				{/* Tasks area - scrollable and droppable */}
-				<div 
+				<div
 					ref={setDroppableTareasRef}
-					className={`flex-1 w-full overflow-y-auto overflow-x-hidden pr-1 rounded-lg transition-all duration-200 ${
+					className={`flex-1 w-full overflow-y-auto overflow-x-hidden pr-1 rounded-[18px] transition-all duration-200 ${
 						isOverTareas ? 'bg-white/20 ring-2 ring-white/40 ring-inset' : ''
 					} ${isOverGrid && !isOverTareas ? 'bg-white/10' : ''}`}
-					style={{ 
-						maxHeight: 'calc(100% - 100px)',
-						minHeight: '120px',
+					style={{
+						maxHeight: 'calc(100% - 104px)',
+						minHeight: '140px',
 					}}
 					onPointerDown={(e) => {
-						// Prevent task interactions from triggering grid drag
 						const target = e.target as HTMLElement;
 						if (target.closest('[data-sortable-tarea]') || target.closest('button')) {
 							e.stopPropagation();
@@ -100,27 +121,30 @@ export default function Grillas({
 					{tareasDeEstaGrilla.length > 0 ? (
 						tareasDeEstaGrilla.map((tarea) => (
 							<div key={tarea.id} data-sortable-tarea="true">
-								<TareaComponent tarea={tarea} />
+								<TareaComponent
+									tarea={tarea}
+									isDone={grilla.tipo === 'done'}
+									onSelect={onSelectTask}
+								/>
 							</div>
 						))
 					) : (
-						<div 
-							className="text-center text-white/50 text-xs py-4 h-full flex items-center justify-center rounded-lg border-2 border-dashed border-white/20 transition-all duration-200"
-							style={{ minHeight: '120px' }}
+						<div
+							className="text-center text-white/60 text-xs py-4 h-full flex items-center justify-center rounded-[18px] border-2 border-dashed border-white/20 transition-all duration-200"
+							style={{ minHeight: '140px' }}
 						>
 							{isDropTarget ? (
 								<span className="text-white font-semibold text-sm animate-pulse">
-									↓ Suelta aquí
+									Suelta aqui
 								</span>
 							) : (
-								<span>Sin tareas</span>
+								<span>Sin tareas por ahora</span>
 							)}
 						</div>
 					)}
 				</div>
 
-				{/* Buttons - not draggable */}
-				<div 
+				<div
 					className="mt-2 flex gap-2 justify-end"
 					onClick={(e) => e.stopPropagation()}
 					onPointerDown={(e) => {
@@ -137,7 +161,12 @@ export default function Grillas({
 					}}
 					style={{ pointerEvents: 'auto' }}
 				>
-					<ButtonAdd handleOpenModal={handleOpenModal} buttonText="+ Tarea" colorButton="bg-white/20 hover:bg-white/30" className="text-xs px-3 py-1.5 text-white" />
+					<ButtonAdd
+						handleOpenModal={handleOpenModal}
+						buttonText="+ Tarea"
+						colorButton="bg-white/20 hover:bg-white/30"
+						className="text-xs px-3 py-1.5 text-white"
+					/>
 					<ButtonDeleteGrilla onDelete={onDelete} grilla={grilla} />
 				</div>
 			</div>

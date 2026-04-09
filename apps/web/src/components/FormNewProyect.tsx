@@ -4,20 +4,26 @@ import { useState } from "react";
 interface FormNewProyectProps {
 	onAdd: (proyecto: Proyecto) => void;
 	onClose: () => void;
+	initialValue?: Proyecto | null;
+	submitLabel?: string;
 }
 
 export default function FormNewProyect({
 	onAdd,
 	onClose,
+	initialValue,
+	submitLabel = 'Crear Proyecto',
 }: FormNewProyectProps) {
-	const [proyecto, setProyecto] = useState<Proyecto>({
-		id: Date.now(),
-		name: '',
-		description: '',
-		owner_id: 1,
-		color: '#3b82f6',
-		is_archived: false,
-	});
+	const [proyecto, setProyecto] = useState<Proyecto>(
+		initialValue ?? {
+			id: Date.now(),
+			name: '',
+			description: '',
+			owner_id: 1,
+			color: '#3b82f6',
+			is_archived: false,
+		}
+	);
 	const [error, setError] = useState('');
 
 	const projectName = proyecto.name.trim();
@@ -34,7 +40,7 @@ export default function FormNewProyect({
 			...proyecto,
 			name: projectName,
 			description: proyecto.description.trim(),
-			created_at: new Date().toISOString(),
+			created_at: proyecto.created_at ?? new Date().toISOString(),
 			updated_at: new Date().toISOString(),
 		});
 		onClose();
@@ -123,7 +129,7 @@ export default function FormNewProyect({
 					disabled={isSubmitDisabled}
 					className="flex-1 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors cursor-pointer shadow-sm"
 				>
-					Crear Proyecto
+					{submitLabel}
 				</button>
 			</div>
 		</form>

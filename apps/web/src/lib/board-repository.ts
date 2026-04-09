@@ -19,15 +19,28 @@ export interface BoardRepository {
 	createProyecto: (
 		proyecto: Omit<Proyecto, 'id' | 'created_at' | 'updated_at'>
 	) => BoardSnapshot;
+	updateProyecto: (
+		proyectoId: number,
+		changes: Partial<Omit<Proyecto, 'id' | 'created_at' | 'updated_at'>>
+	) => BoardSnapshot;
 	createGrilla: (
 		proyectoId: number,
 		grilla: Omit<Grilla, 'id' | 'proyect_id' | 'position' | 'created_at' | 'updated_at'>
+	) => BoardSnapshot;
+	updateGrilla: (
+		grillaId: number,
+		changes: Partial<Omit<Grilla, 'id' | 'proyect_id' | 'position' | 'created_at' | 'updated_at'>>
 	) => BoardSnapshot;
 	deleteGrilla: (grillaId: number) => BoardSnapshot;
 	createTarea: (
 		grillaId: number,
 		tarea: Omit<Tarea, 'id' | 'grilla_id' | 'position' | 'created_at' | 'updated_at'>
 	) => BoardSnapshot;
+	updateTarea: (
+		tareaId: number,
+		changes: Partial<Omit<Tarea, 'id' | 'grilla_id' | 'position' | 'created_at' | 'updated_at'>>
+	) => BoardSnapshot;
+	deleteTarea: (tareaId: number) => BoardSnapshot;
 	reorderGrillas: (proyectoId: number, grillas: Grilla[]) => BoardSnapshot;
 	reorderTareas: (proyectoId: number, tareas: Tarea[]) => BoardSnapshot;
 	moveTarea: (
@@ -349,6 +362,26 @@ export const localStorageBoardRepository: BoardRepository = {
 				proyectoActivo: snapshot.proyectoActivo ?? nuevoProyecto.id,
 			};
 		}),
+	updateProyecto: (proyectoId, changes) =>
+		updateBoard((snapshot) => {
+			const now = new Date().toISOString();
+
+			return {
+				...snapshot,
+				proyectos: snapshot.proyectos.map((proyecto) =>
+					proyecto.id === proyectoId
+						? {
+								...proyecto,
+								...changes,
+								name: changes.name?.trim() || proyecto.name,
+								description:
+									changes.description?.trim() ?? proyecto.description,
+								updated_at: now,
+						  }
+						: proyecto
+				),
+			};
+		}),
 	createGrilla: (proyectoId, grilla) =>
 		updateBoard((snapshot) => {
 			const now = new Date().toISOString();
@@ -367,6 +400,24 @@ export const localStorageBoardRepository: BoardRepository = {
 			return {
 				...snapshot,
 				grillas: [...snapshot.grillas, nuevaGrilla],
+			};
+		}),
+	updateGrilla: (grillaId, changes) =>
+		updateBoard((snapshot) => {
+			const now = new Date().toISOString();
+
+			return {
+				...snapshot,
+				grillas: snapshot.grillas.map((grilla) =>
+					grilla.id === grillaId
+						? {
+								...grilla,
+								...changes,
+								name: changes.name?.trim() || grilla.name,
+								updated_at: now,
+						  }
+						: grilla
+				),
 			};
 		}),
 	deleteGrilla: (grillaId) =>
@@ -397,6 +448,39 @@ export const localStorageBoardRepository: BoardRepository = {
 				tareas: [...snapshot.tareas, nuevaTarea],
 			};
 		}),
+	updateTarea: (tareaId, changes) =>
+		updateBoard((snapshot) => {
+			const now = new Date().toISOString();
+
+			return {
+				...snapshot,
+				tareas: snapshot.tareas.map((tarea) =>
+					tarea.id === tareaId
+						? {
+								...tarea,
+								...changes,
+								title: changes.title?.trim() || tarea.title,
+								description:
+									changes.description?.trim() ?? tarea.description,
+								start_date: formatDateOnly(
+									changes.start_date ?? tarea.start_date,
+									tarea.start_date
+								),
+								due_date: formatDateOnly(
+									changes.due_date ?? tarea.due_date,
+									tarea.due_date
+								),
+								updated_at: now,
+						  }
+						: tarea
+				),
+			};
+		}),
+	deleteTarea: (tareaId) =>
+		updateBoard((snapshot) => ({
+			...snapshot,
+			tareas: snapshot.tareas.filter((tarea) => tarea.id !== tareaId),
+		})),
 	reorderGrillas: (proyectoId, grillas) =>
 		updateBoard((snapshot) => {
 			const now = new Date().toISOString();
