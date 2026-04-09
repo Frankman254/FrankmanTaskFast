@@ -1,66 +1,47 @@
-// Shared types between frontend and backend
+export type PrioridadTarea = 'Alta' | 'Media' | 'Baja';
+export type TipoGrilla = 'todo' | 'doing' | 'done' | 'custom';
 
-export interface Project {
-  id: string;
-  name: string;
-  description?: string;
-  created_at: string;
-  updated_at: string;
+export interface Grilla {
+	id: number;
+	proyect_id: number;
+	name: string;
+	position: number;
+	color: string;
+	tipo: TipoGrilla;
+	created_at?: string;
+	updated_at?: string;
 }
 
-export interface Column {
-  id: string;
-  project_id: string;
-  name: string;
-  position: number;
-  created_at: string;
-  updated_at: string;
+export interface Proyecto {
+	id: number;
+	name: string;
+	description: string;
+	owner_id: number;
+	color: string;
+	is_archived: boolean;
+	created_at?: string;
+	updated_at?: string;
 }
 
-export interface Task {
-  id: string;
-  column_id: string;
-  title: string;
-  description?: string;
-  position: number;
-  due_date?: string;
-  created_at: string;
-  updated_at: string;
+export interface TareaHistoryEntry {
+	action: string;
+	timestamp: string;
+	from_grilla?: number;
+	to_grilla?: number;
 }
 
-export interface CreateProjectRequest {
-  name: string;
-  description?: string;
-}
-
-export interface UpdateProjectRequest {
-  name?: string;
-  description?: string;
-}
-
-export interface CreateColumnRequest {
-  project_id: string;
-  name: string;
-  position: number;
-}
-
-export interface UpdateColumnRequest {
-  name?: string;
-  position?: number;
-}
-
-export interface CreateTaskRequest {
-  column_id: string;
-  title: string;
-  description?: string;
-  position: number;
-  due_date?: string;
-}
-
-export interface UpdateTaskRequest {
-  title?: string;
-  description?: string;
-  position?: number;
-  due_date?: string;
-  column_id?: string;
+export interface Tarea {
+	id: number;
+	grilla_id: number;
+	title: string;
+	description: string;
+	position: number;
+	assigned_to: number;
+	start_date: string;
+	due_date: string;
+	priority: PrioridadTarea;
+	created_by: number;
+	created_at: string;
+	updated_at: string;
+	history?: TareaHistoryEntry[];
 }

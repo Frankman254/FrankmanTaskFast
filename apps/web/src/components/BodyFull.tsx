@@ -1,6 +1,5 @@
 import { useState } from "react";
-import type { Grilla, Tarea } from "../types/models";
-import type { Proyecto } from "../types/models";
+import type { Grilla, Proyecto, Tarea } from "@frankman-task-fast/types";
 import FormNewProyect from "./FormNewProyect";
 import FormAddTarea from "./FormAddTarea";
 import ButtonAdd from "./ButtonAdd";

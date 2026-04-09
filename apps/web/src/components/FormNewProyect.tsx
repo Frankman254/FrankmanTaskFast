@@ -1,4 +1,4 @@
-import type { Proyecto } from "@/types/models";
+import type { Proyecto } from "@frankman-task-fast/types";
 import { useState } from "react";
 
 interface FormNewProyectProps {

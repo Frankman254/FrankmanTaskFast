@@ -2,10 +2,8 @@ import ButtonAdd from "./ButtonAdd";
 import Grillas from "./Grillas";
 import { SortableContext, horizontalListSortingStrategy, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor, pointerWithin, rectIntersection } from "@dnd-kit/core";
-import type { Grilla } from "../types/models";
 import type { DragEndEvent, DragStartEvent, DragOverEvent, CollisionDetection } from "@dnd-kit/core";
-import type { Proyecto } from "../types/models";
-import type { Tarea } from "../types/models";
+import type { Grilla, Proyecto, Tarea } from "@frankman-task-fast/types";
 import { useState, useCallback } from "react";
 
 interface ProyectoTableroProps {

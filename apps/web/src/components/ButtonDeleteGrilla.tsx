@@ -1,4 +1,4 @@
-import type { Grilla } from "../types/models";
+import type { Grilla } from "@frankman-task-fast/types";
 import { Trash2 } from "lucide-react";
 
 export default function ButtonDeleteGrilla({ onDelete, grilla }: { onDelete: (id: number) => void, grilla: Grilla }) {

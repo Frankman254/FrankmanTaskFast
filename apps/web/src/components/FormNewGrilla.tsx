@@ -1,4 +1,4 @@
-import type { Grilla } from "../types/models";
+import type { Grilla } from "@frankman-task-fast/types";
 import { useState } from "react";
 
 interface FormNewGrillaProps {
@@ -7,20 +7,26 @@ interface FormNewGrillaProps {
 }
 
 export default function FormNewGrilla({ onAdd, onClose }: FormNewGrillaProps) {
-    const [grilla, setGrilla] = useState<Grilla>({
-        id: Date.now(),
-        name: '',
-        color: '#6366f1',
-    });
+	const [grilla, setGrilla] = useState<Grilla>({
+		id: Date.now(),
+		name: '',
+		color: '#6366f1',
+		position: 0,
+		proyect_id: 0,
+		tipo: 'custom',
+	});
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!grilla.name.trim()) return;
-        onAdd({
-            id: Date.now(),
-            name: grilla.name,
-            color: grilla.color,
-        });
+		onAdd({
+			id: Date.now(),
+			name: grilla.name,
+			color: grilla.color,
+			position: grilla.position,
+			proyect_id: grilla.proyect_id,
+			tipo: grilla.tipo,
+		});
         onClose();
     };
 

@@ -1,4 +1,4 @@
-import type { Grilla, Tarea } from "../types/models";
+import type { Grilla, Tarea } from "@frankman-task-fast/types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useDroppable } from "@dnd-kit/core";

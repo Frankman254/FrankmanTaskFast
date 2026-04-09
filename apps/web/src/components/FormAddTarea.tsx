@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Tarea } from "../types/models";
+import type { PrioridadTarea, Tarea } from "@frankman-task-fast/types";
 
 interface FormAddTareaProps {
     onAdd: (tarea: Tarea) => void;
@@ -33,7 +33,7 @@ export default function FormAddTarea({ onAdd, onClose }: FormAddTareaProps) {
         onClose();
     };
 
-    const priorities = [
+    const priorities: { value: PrioridadTarea; label: string; color: string }[] = [
         { value: 'Alta', label: 'Alta', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800' },
         { value: 'Media', label: 'Media', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800' },
         { value: 'Baja', label: 'Baja', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' },

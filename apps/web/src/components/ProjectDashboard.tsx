@@ -1,4 +1,4 @@
-import type { Grilla, Tarea, Proyecto } from "../types/models";
+import type { Grilla, Proyecto, Tarea } from "@frankman-task-fast/types";
 import { CheckCircle2, ClipboardList, Clock } from 'lucide-react';
 
 interface ProjectDashboardProps {
