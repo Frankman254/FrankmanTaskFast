@@ -4,51 +4,31 @@ import FormNewProyect from "./FormNewProyect";
 import FormAddTarea from "./FormAddTarea";
 import ButtonAdd from "./ButtonAdd";
 import ProyectoTablero from "./ProyectoTablero";
-import { grillasDefault, proyectosDefault, tareasDefault } from "../data_default/dataDefault";
 import FormNewGrilla from "./FormNewGrilla";
 import Modal from "./Modal";
-import { useLocalStorage } from "../hooks/useLocalStorage";
 import ProjectDashboard from "./ProjectDashboard";
 import { ClipboardList } from "lucide-react";
+import { localStorageBoardRepository } from "@/lib/board-repository";
 
 export default function BodyFull() {
     const [isModalOpenProyecto, setIsModalOpenProyecto] = useState(false);
     const [isModalOpenTarea, setIsModalOpenTarea] = useState(false);
     const [isModalOpenGrilla, setIsModalOpenGrilla] = useState(false);
     const [grillaSeleccionadaParaTarea, setGrillaSeleccionadaParaTarea] = useState<number | null>(null);
-    
-    // Connect to LocalStorage for persistence
-    const [proyectos, setProyectos] = useLocalStorage<Proyecto[]>('frankman_proyectos', proyectosDefault);
-    
-    const [proyectoActivo, setProyectoActivo] = useLocalStorage<number | null>('frankman_proyecto_activo',
-        proyectosDefault.length > 0 ? proyectosDefault[0].id : null
-    );
-    
-    const [todasLasGrillas, setTodasLasGrillas] = useLocalStorage<Grilla[]>('frankman_grillas',
-        grillasDefault.map(g => ({
-            ...g,
-            created_at: (g as any).created_at || new Date().toISOString(),
-            updated_at: (g as any).updated_at || new Date().toISOString(),
-        }))
-    );
-    const [todasLasTareas, setTodasLasTareas] = useLocalStorage<Tarea[]>('frankman_tareas', tareasDefault);
+
+    const [board, setBoard] = useState(() => localStorageBoardRepository.loadBoard());
+    const { proyectos, proyectoActivo, grillas: todasLasGrillas, tareas: todasLasTareas } = board;
 
     const handleAddProyecto = (nuevoProyecto: Proyecto) => {
-        setProyectos(prevProyectos => {
-            const newId = prevProyectos.length > 0 ? Math.max(...prevProyectos.map(p => p.id)) + 1 : 1;
-            const proyectoCompleto = {
-                ...nuevoProyecto,
-                id: newId,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            };
-            
-            if (prevProyectos.length === 0) {
-                setProyectoActivo(newId);
-            }
-            
-            return [...prevProyectos, proyectoCompleto];
-        });
+        setBoard(
+            localStorageBoardRepository.createProyecto({
+                name: nuevoProyecto.name,
+                description: nuevoProyecto.description,
+                owner_id: nuevoProyecto.owner_id,
+                color: nuevoProyecto.color,
+                is_archived: nuevoProyecto.is_archived,
+            })
+        );
         setIsModalOpenProyecto(false);
     };
 
@@ -56,16 +36,13 @@ export default function BodyFull() {
         g => g.proyect_id === proyectoActivo
     );
 
-    const getNextGrillaId = () => {
-        if (todasLasGrillas.length === 0) return 1;
-        return Math.max(...todasLasGrillas.map(g => g.id)) + 1;
+    const handleUpdateGrillas = (proyectoId: number, nuevasGrillas: Grilla[]) => {
+        setBoard(localStorageBoardRepository.reorderGrillas(proyectoId, nuevasGrillas));
     };
 
-    const handleUpdateGrillas = (proyectoId: number, nuevasGrillas: Grilla[]) => {
-        setTodasLasGrillas(prevGrillas => {
-            const grillasSinProyecto = prevGrillas.filter(g => g.proyect_id !== proyectoId);
-            return [...grillasSinProyecto, ...nuevasGrillas];
-        });
+    const getNextGrillaId = () => {
+        if (todasLasGrillas.length === 0) return 1;
+        return Math.max(...todasLasGrillas.map(grilla => grilla.id)) + 1;
     };
 
     const proyectoSeleccionado = proyectos.find(p => p.id === proyectoActivo);
@@ -75,32 +52,31 @@ export default function BodyFull() {
         grillasIdsDelProyecto.includes(tarea.grilla_id)
     );
 
-    const getNextTareaId = () => {
-        if (todasLasTareas.length === 0) return 1;
-        return Math.max(...todasLasTareas.map(t => t.id)) + 1;
+    const handleUpdateTareas = (nuevasTareas: Tarea[]) => {
+        if (!proyectoActivo) return;
+        setBoard(localStorageBoardRepository.reorderTareas(proyectoActivo, nuevasTareas));
     };
 
-    const handleUpdateTareas = (nuevasTareas: Tarea[]) => {
-        setTodasLasTareas(nuevasTareas);
+    const getNextTareaId = () => {
+        if (todasLasTareas.length === 0) return 1;
+        return Math.max(...todasLasTareas.map(tarea => tarea.id)) + 1;
     };
 
     const handleAddTarea = (nuevaTarea: Tarea) => {
         if (!grillaSeleccionadaParaTarea) return;
-        
-        const newId = getNextTareaId();
-        const tareasDeGrilla = tareasDelProyectoActivo.filter(t => t.grilla_id === grillaSeleccionadaParaTarea);
-        const newPos = tareasDeGrilla.length + 1;
-        
-        const tareaCompleta = {
-            ...nuevaTarea,
-            id: newId,
-            grilla_id: grillaSeleccionadaParaTarea,
-            position: newPos,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        };
-        
-        handleUpdateTareas([...todasLasTareas, tareaCompleta]);
+
+        setBoard(
+            localStorageBoardRepository.createTarea(grillaSeleccionadaParaTarea, {
+                title: nuevaTarea.title,
+                description: nuevaTarea.description,
+                assigned_to: nuevaTarea.assigned_to,
+                start_date: nuevaTarea.start_date,
+                due_date: nuevaTarea.due_date,
+                priority: nuevaTarea.priority,
+                created_by: nuevaTarea.created_by,
+                history: nuevaTarea.history,
+            })
+        );
         setIsModalOpenTarea(false);
         setGrillaSeleccionadaParaTarea(null);
     };
@@ -116,19 +92,14 @@ export default function BodyFull() {
 
     const handleAddGrilla = (nuevaGrilla: Grilla) => {
         if (!proyectoActivo) return;
-        
-        const newId = getNextGrillaId();
-        const grillasDelProyecto = grillasDelProyectoActivo;
-        const newPos = grillasDelProyecto.length + 1;
-        const grillaConProyecto = {
-            ...nuevaGrilla,
-            id: newId,
-            proyect_id: proyectoActivo,
-            position: newPos,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        };
-        handleUpdateGrillas(proyectoActivo, [...grillasDelProyecto, grillaConProyecto]);
+
+        setBoard(
+            localStorageBoardRepository.createGrilla(proyectoActivo, {
+                name: nuevaGrilla.name,
+                color: nuevaGrilla.color,
+                tipo: nuevaGrilla.tipo,
+            })
+        );
         setIsModalOpenGrilla(false);
     };
 
@@ -146,7 +117,7 @@ export default function BodyFull() {
                 {proyectos.map((proyecto) => (
                     <button
                         key={proyecto.id}
-                        onClick={() => setProyectoActivo(proyecto.id)}
+                        onClick={() => setBoard(localStorageBoardRepository.setProyectoActivo(proyecto.id))}
                         className={`px-4 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${
                             proyectoActivo === proyecto.id
                                 ? 'text-white shadow-md scale-[1.02]'
